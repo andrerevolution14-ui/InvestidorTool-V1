@@ -4,7 +4,7 @@
    ═══════════════════════════════════════ */
 
 :root {
-  --bg-primary: #0f0f12;
+  --bg-primary: #000000;
   --bg-secondary: #16161b;
   --bg-card: #1c1c23;
   --bg-card-hover: #25252e;
@@ -202,20 +202,18 @@ h3 {
   height: auto;
 }
 
-.logo-blend {
-  mix-blend-mode: screen;
-}
+/* Matching background is more reliable than blend mode */
 
 .logo-lg {
-  width: min(580px, 85vw);
+  width: min(640px, 90vw);
 }
 
 .logo-md {
-  width: min(460px, 75vw);
+  width: min(500px, 80vw);
 }
 
 .logo-sm {
-  width: min(360px, 65vw);
+  width: min(400px, 70vw);
 }
 
 .logo-clickable {
@@ -946,15 +944,15 @@ h3 {
   }
 
   .logo-lg {
-    width: min(480px, 90vw);
+    width: min(520px, 95vw);
   }
 
   .logo-md {
-    width: min(380px, 80vw);
+    width: min(420px, 85vw);
   }
 
   .logo-sm {
-    width: min(320px, 70vw);
+    width: min(340px, 75vw);
   }
 
   .headline-hero {
