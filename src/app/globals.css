@@ -189,14 +189,17 @@ h3 {
 
 /* ── Logo – Dark BG Image, No Badge ── */
 .step-logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   margin-bottom: 1.75rem;
-  text-align: center;
+  width: 100%;
 }
 
 .logo-img {
   display: block;
   object-fit: contain;
-  margin: 0 auto;
+  height: auto;
 }
 
 .logo-blend {
@@ -204,18 +207,15 @@ h3 {
 }
 
 .logo-lg {
-  width: clamp(280px, 60vw, 440px) !important;
-  height: auto !important;
+  width: min(500px, 75vw);
 }
 
 .logo-md {
-  width: clamp(220px, 48vw, 360px) !important;
-  height: auto !important;
+  width: min(400px, 65vw);
 }
 
 .logo-sm {
-  width: clamp(180px, 36vw, 280px) !important;
-  height: auto !important;
+  width: min(320px, 55vw);
 }
 
 .logo-clickable {
@@ -943,15 +943,15 @@ h3 {
   }
 
   .logo-lg {
-    width: clamp(240px, 70vw, 380px) !important;
+    width: min(420px, 80vw);
   }
 
   .logo-md {
-    width: clamp(200px, 55vw, 320px) !important;
+    width: min(340px, 70vw);
   }
 
   .logo-sm {
-    width: clamp(160px, 44vw, 250px) !important;
+    width: min(280px, 60vw);
   }
 
   .headline-hero {
