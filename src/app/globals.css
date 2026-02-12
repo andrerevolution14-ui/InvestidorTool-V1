@@ -192,9 +192,8 @@ h3 {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 1.75rem;
+  margin-bottom: 2rem;
   width: 100%;
-  background-color: var(--bg-primary);
 }
 
 .logo-img {
@@ -204,19 +203,19 @@ h3 {
 }
 
 .logo-blend {
-  mix-blend-mode: lighten;
+  mix-blend-mode: screen;
 }
 
 .logo-lg {
-  width: min(500px, 75vw);
+  width: min(580px, 85vw);
 }
 
 .logo-md {
-  width: min(400px, 65vw);
+  width: min(460px, 75vw);
 }
 
 .logo-sm {
-  width: min(320px, 55vw);
+  width: min(360px, 65vw);
 }
 
 .logo-clickable {
@@ -328,26 +327,29 @@ h3 {
   box-shadow: 0 6px 24px rgba(212, 168, 67, 0.3);
 }
 
-/* WA pill – visible, clickable, no green fill */
+/* WA pill – clearly clickable, visible button */
 .wa-pill {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  padding: 0.55rem 1.3rem;
-  color: var(--text-secondary);
+  gap: 0.6rem;
+  padding: 0.7rem 1.6rem;
+  color: var(--text-primary);
   font-family: inherit;
-  font-size: 0.9rem;
-  font-weight: 500;
+  font-size: 0.95rem;
+  font-weight: 600;
   text-decoration: none;
-  border: 1px solid var(--border-card);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid var(--border-gold);
   border-radius: 100px;
   transition: all 200ms var(--ease-smooth);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .wa-pill:hover {
-  border-color: var(--border-gold);
-  color: var(--text-primary);
+  transform: translateY(-2px);
   background: var(--gold-subtle);
+  border-color: var(--gold-light);
+  box-shadow: 0 6px 20px rgba(212, 168, 67, 0.15);
 }
 
 /* Final CTA – green, prominent */
@@ -944,15 +946,15 @@ h3 {
   }
 
   .logo-lg {
-    width: min(420px, 80vw);
+    width: min(480px, 90vw);
   }
 
   .logo-md {
-    width: min(340px, 70vw);
+    width: min(380px, 80vw);
   }
 
   .logo-sm {
-    width: min(280px, 60vw);
+    width: min(320px, 70vw);
   }
 
   .headline-hero {
