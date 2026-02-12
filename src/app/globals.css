@@ -194,6 +194,7 @@ h3 {
   align-items: center;
   margin-bottom: 1.75rem;
   width: 100%;
+  background-color: var(--bg-primary);
 }
 
 .logo-img {
