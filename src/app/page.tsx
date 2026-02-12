@@ -5,49 +5,56 @@ import Image from "next/image";
 import ProgressBar from "@/components/ProgressBar";
 import { saveLeadAction } from "./actions";
 
-type Step = "hero" | "q1" | "q2" | "q3" | "processing" | "results" | "analysis" | "strategy" | "final";
+type Step =
+  "hero" | "q1" | "q2" | "q3" | "processing" |
+  "results" | "anchor" | "trigger" | "authority" | "frictions" | "strategy" | "final";
 
 const SESSION_KEY = "silvermont_funnel";
 const WA_NUM = "351XXXXXXXXX";
-const WA_MSG = encodeURIComponent("Olá, completei a simulação e gostaria de receber oportunidades fora de mercado em Aveiro.");
+const WA_MSG = encodeURIComponent("Olá, vi os vossos critérios internos e gostaria de discutir o acesso a oportunidades off-market em Aveiro.");
 const WA_URL = `https://wa.me/${WA_NUM}?text=${WA_MSG}`;
 
 const CAPITAL_OPTIONS = [
-  { value: "under_100k", label: "Menos de €100.000", sub: "Entrada estratégica", avg: 75000 },
-  { value: "100k_300k", label: "€100.000 – €300.000", sub: "Capital sólido", avg: 200000 },
-  { value: "300k_800k", label: "€300.000 – €800.000", sub: "Operações de escala", avg: 500000 },
-  { value: "800k_plus", label: "Mais de €800.000", sub: "Capital institucional", avg: 1000000 },
+  { value: "under_100k", label: "Menos de €100.000", sub: "Ticket de entrada", avg: 75000 },
+  { value: "100k_300k", label: "€100.000 – €300.000", sub: "Capacidade unitária sólida", avg: 200000 },
+  { value: "300k_800k", label: "€300.000 – €800.000", sub: "Múltiplas operações paralelas", avg: 500000 },
+  { value: "800k_plus", label: "Mais de €800.000", sub: "Escala institucional", avg: 1000000 },
 ];
 const HORIZON_OPTIONS = [
-  { value: "short", label: "Retorno rápido", sub: "Até 12 meses" },
-  { value: "medium", label: "Paciência moderada", sub: "1 a 3 anos" },
-  { value: "long", label: "Longo prazo", sub: "3+ anos" },
+  { value: "short", label: "Ciclos curtos", sub: "Até 12 meses (Reversão rápida)" },
+  { value: "medium", label: "Médio prazo", sub: "1 a 3 anos (Estruturação)" },
+  { value: "long", label: "Longo prazo", sub: "3+ anos (Equity building)" },
 ];
-const MINDSET_OPTIONS = [
-  { value: "passive", label: "Investir e não me preocupar", sub: "Totalmente delegado" },
-  { value: "active", label: "Gosto de acompanhar e decidir", sub: "Envolvido no processo" },
-  { value: "hybrid", label: "Acompanhar com equipa profissional", sub: "Visibilidade total, execução delegada" },
+const TRIGGER_OPTIONS = [
+  { value: "preservation", label: "Preservação de capital", sub: "Foco em risco mínimo e ativos resilientes" },
+  { value: "growth", label: "Crescimento gradual", sub: "Valorização estável e yield recorrente" },
+  { value: "opportunistic", label: "Estratégias oportunísticas", sub: "Compra forçada, distressed e reconversão" },
+  { value: "analysis", label: "Ainda em fase de análise", sub: "Estudo de viabilidade de mercado" },
 ];
 
 function fmt(n: number) { return "€" + n.toLocaleString("pt-PT"); }
+
 function getUserStep(s: Step): { n: number; t: number } | null {
-  if (s === "hero" || s === "processing") return null;
-  if (s === "q1" || s === "q2" || s === "q3") return { n: 1, t: 5 };
-  if (s === "results") return { n: 2, t: 5 };
-  if (s === "analysis") return { n: 3, t: 5 };
-  if (s === "strategy") return { n: 4, t: 5 };
-  return { n: 5, t: 5 };
+  const steps: Step[] = ["q1", "q2", "q3", "results", "anchor", "trigger", "authority", "frictions", "strategy", "final"];
+  const idx = steps.indexOf(s);
+  if (idx === -1) return null;
+  return { n: idx + 1, t: steps.length };
 }
+
 function getProgress(s: Step): number {
-  const m: Record<Step, number> = { hero: 0, q1: 10, q2: 18, q3: 26, processing: 38, results: 52, analysis: 68, strategy: 84, final: 100 };
+  const m: Record<Step, number> = {
+    hero: 0, q1: 10, q2: 18, q3: 26, processing: 35,
+    results: 45, anchor: 55, trigger: 65, authority: 75,
+    frictions: 85, strategy: 95, final: 100
+  };
   return m[s];
 }
+
 function getReturns(cap: string, hor: string) {
   const avg = CAPITAL_OPTIONS.find(o => o.value === cap)?.avg || 200000;
-  let rMin = 7, rMax = 12, oMin = 14, oMax = 22;
-  if (hor === "long") { rMin += 2; rMax += 2; oMin += 2; oMax += 3; }
-  if (hor === "short") { rMin -= 1; rMax -= 1; oMin -= 2; oMax -= 2; }
-  if (cap === "800k_plus" || cap === "300k_800k") { rMin += 1; rMax += 1; oMin += 1; oMax += 1; }
+  let rMin = 6.5, rMax = 11, oMin = 13, oMax = 19;
+  if (hor === "long") { rMin += 1.5; rMax += 2; oMin += 2; oMax += 3; }
+  if (hor === "short") { rMin -= 1; rMax -= 0.5; oMin -= 1.5; oMax -= 1.5; }
   return {
     realistic: { minP: rMin, maxP: rMax, minE: Math.round(avg * rMin / 100), maxE: Math.round(avg * rMax / 100) },
     optimized: { minP: oMin, maxP: oMax, minE: Math.round(avg * oMin / 100), maxE: Math.round(avg * oMax / 100) },
@@ -70,40 +77,60 @@ function Logo({ size = "md", onClick }: { size?: "lg" | "md" | "sm"; onClick?: (
   return <div className="step-logo">{inner}</div>;
 }
 
-/* WA pill link – visible but not green, used in steps 2-4 */
-function WaLink({ id }: { id: string }) {
-  return <div style={{ textAlign: "center", marginTop: "0.75rem" }}><a href={WA_URL} target="_blank" rel="noopener noreferrer" className="wa-pill" id={id}><WaIcon s={15} /><span>Receber oportunidades fora de mercado</span></a></div>;
+function WaPill({ id, label }: { id: string, label: string }) {
+  return (
+    <div style={{ textAlign: "center", marginTop: "1rem" }}>
+      <a href={WA_URL} target="_blank" rel="noopener noreferrer" className="wa-pill" id={id}>
+        <WaIcon s={15} />
+        <span>{label}</span>
+      </a>
+    </div>
+  );
 }
 
 export default function Home() {
   const [step, setStep] = useState<Step>("hero");
   const [capital, setCapital] = useState("");
   const [horizon, setHorizon] = useState("");
-  const [mindset, setMindset] = useState("");
+  const [trigger, setTrigger] = useState("");
   const [ready, setReady] = useState(false);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    try { const raw = localStorage.getItem(SESSION_KEY); if (raw) { const s = JSON.parse(raw); if (s.step && s.step !== "processing") { setStep(s.step); setCapital(s.capital || ""); setHorizon(s.horizon || ""); setMindset(s.mindset || ""); } } } catch { }
+    try {
+      const raw = localStorage.getItem(SESSION_KEY);
+      if (raw) {
+        const s = JSON.parse(raw);
+        if (s.step && !["processing"].includes(s.step)) {
+          setStep(s.step);
+          setCapital(s.capital || "");
+          setHorizon(s.horizon || "");
+          setTrigger(s.trigger || "");
+        }
+      }
+    } catch { }
     setReady(true);
   }, []);
+
   useEffect(() => {
     if (!ready) return;
-    try { localStorage.setItem(SESSION_KEY, JSON.stringify({ step, capital, horizon, mindset, ts: Date.now() })); } catch { }
-  }, [step, capital, horizon, mindset, ready]);
+    try { localStorage.setItem(SESSION_KEY, JSON.stringify({ step, capital, horizon, trigger, ts: Date.now() })); } catch { }
+  }, [step, capital, horizon, trigger, ready]);
 
   const go = useCallback((s: Step) => { setStep(s); window.scrollTo({ top: 0, behavior: "smooth" }); }, []);
-  const restart = useCallback(() => { localStorage.removeItem(SESSION_KEY); setCapital(""); setHorizon(""); setMindset(""); go("hero"); }, [go]);
+  const restart = useCallback(() => { localStorage.removeItem(SESSION_KEY); setCapital(""); setHorizon(""); setTrigger(""); go("hero"); }, [go]);
+
   const selectCapital = useCallback((v: string) => { setCapital(v); setTimeout(() => go("q2"), 200); }, [go]);
   const selectHorizon = useCallback((v: string) => { setHorizon(v); setTimeout(() => go("q3"), 200); }, [go]);
   const selectMindset = useCallback(async (v: string) => {
-    setMindset(v);
     setTimeout(async () => {
       go("processing");
       try { await saveLeadAction({ capital, horizonte: horizon, preferencia: v }); } catch { }
       setTimeout(() => go("results"), 1800);
     }, 200);
   }, [capital, horizon, go]);
+
+  const selectTrigger = useCallback((v: string) => { setTrigger(v); setTimeout(() => go("authority"), 200); }, [go]);
 
   const returns = useMemo(() => getReturns(capital, horizon), [capital, horizon]);
   const capLabel = CAPITAL_OPTIONS.find(o => o.value === capital)?.label || "";
@@ -115,27 +142,27 @@ export default function Home() {
     <main className="funnel">
       {step !== "hero" && step !== "processing" && <ProgressBar progress={getProgress(step)} stepInfo={userStepInfo} />}
 
-      {/* ═══ HERO ═══ */}
+      {/* ═══ 1. HERO ═══ */}
       {step === "hero" && (
         <section className="step-view step-centered animate-step" id="hero">
           <Logo size="lg" />
-          <h1 className="headline-hero">Aveiro está a explodir.<br /><span className="gold-highlight">O seu dinheiro devia estar lá.</span></h1>
-          <p className="subheadline">+12% valorização anual. Procura recorde. Stock limitado. Descubra em 30 segundos se faz sentido para si.</p>
+          <h1 className="headline-hero">O mercado imobiliário em Aveiro apresenta <span className="gold-highlight">janela de oportunidade técnica.</span></h1>
+          <p className="subheadline">Valorização de capital suportada por escassez real de stock residencial e pressão de procura internacional. Valide o seu perfil de alocação em 30 segundos.</p>
           <div className="hero-value-list">
-            <div className="hero-value-item"><span className="hv-icon">📊</span><span>Simulação personalizada de retorno</span></div>
-            <div className="hero-value-item"><span className="hv-icon">🟢</span><span>Guia: Deve ou não investir em Aveiro</span></div>
-            <div className="hero-value-item"><span className="hv-icon">🔑</span><span>Acesso a oportunidades fora de mercado</span></div>
+            <div className="hero-value-item"><span className="hv-icon">📊</span><span>Simulação de rentabilidade por escalão de capital</span></div>
+            <div className="hero-value-item"><span className="hv-icon">📌</span><span>Identificação de fricções de mercado locais</span></div>
+            <div className="hero-value-item"><span className="hv-icon">🔑</span><span>Critérios de seleção para ativos off-market</span></div>
           </div>
-          <button className="btn-primary" onClick={() => go("q1")} id="cta-start">Iniciar JÁ a Minha Simulação Gratuita →</button>
-          <p className="micro-text" style={{ marginTop: "0.75rem" }}>Sem compromisso · Resultado imediato</p>
+          <button className="btn-primary" onClick={() => go("q1")} id="cta-start">Iniciar Validação de Perfil →</button>
+          <p className="micro-text" style={{ marginTop: "0.75rem" }}>Análise baseada em dados reais de operação · Sem custo</p>
         </section>
       )}
 
-      {/* ═══ QUIZ Q1-Q3 ═══ */}
+      {/* ═══ QUIZ ═══ */}
       {step === "q1" && (
         <section className="step-view step-centered animate-step" id="step-q1">
           <Logo size="sm" />
-          <div className="step-header"><span className="step-number">Pergunta 1 de 3</span><h2 className="step-question">Quanto capital tem disponível para investir?</h2></div>
+          <div className="step-header"><span className="step-number">Configuração de Alocação</span><h2 className="step-question">Qual o capital disponível para operação imobiliária?</h2></div>
           <div className="step-content"><div className="options-grid stagger-children">
             {CAPITAL_OPTIONS.map(o => (<button key={o.value} className={`option-card${capital === o.value ? " selected" : ""}`} onClick={() => selectCapital(o.value)}><span className="option-indicator" /><div><div className="option-label">{o.label}</div><div className="option-sublabel">{o.sub}</div></div></button>))}
           </div></div>
@@ -144,7 +171,7 @@ export default function Home() {
       {step === "q2" && (
         <section className="step-view step-centered animate-step" id="step-q2">
           <Logo size="sm" />
-          <div className="step-header"><span className="step-number">Pergunta 2 de 3</span><h2 className="step-question">Quando precisa de ver o retorno?</h2></div>
+          <div className="step-header"><span className="step-number">Timeline de Operação</span><h2 className="step-question">Qual o horizonte temporal pretendido para o retorno?</h2></div>
           <div className="step-content"><div className="options-grid stagger-children">
             {HORIZON_OPTIONS.map(o => (<button key={o.value} className={`option-card${horizon === o.value ? " selected" : ""}`} onClick={() => selectHorizon(o.value)}><span className="option-indicator" /><div><div className="option-label">{o.label}</div><div className="option-sublabel">{o.sub}</div></div></button>))}
           </div></div>
@@ -153,9 +180,11 @@ export default function Home() {
       {step === "q3" && (
         <section className="step-view step-centered animate-step" id="step-q3">
           <Logo size="sm" />
-          <div className="step-header"><span className="step-number">Pergunta 3 de 3</span><h2 className="step-question">Como prefere gerir o seu investimento?</h2></div>
+          <div className="step-header"><span className="step-number">Modelo de Execução</span><h2 className="step-question">Qual a sua experiência preferencial de gestão?</h2></div>
           <div className="step-content"><div className="options-grid stagger-children">
-            {MINDSET_OPTIONS.map(o => (<button key={o.value} className={`option-card${mindset === o.value ? " selected" : ""}`} onClick={() => selectMindset(o.value)}><span className="option-indicator" /><div><div className="option-label">{o.label}</div><div className="option-sublabel">{o.sub}</div></div></button>))}
+            <button className="option-card" onClick={() => selectMindset("passive")}><span className="option-indicator" /><div><div className="option-label">Totalmente delegada</div><div className="option-sublabel">Gestão integral da operação por equipa de terreno</div></div></button>
+            <button className="option-card" onClick={() => selectMindset("active")}><span className="option-indicator" /><div><div className="option-label">Acompanhamento direto</div><div className="option-sublabel">Envolvimento na tomada de decisão estratégica</div></div></button>
+            <button className="option-card" onClick={() => selectMindset("hybrid")}><span className="option-indicator" /><div><div className="option-label">Monitorização estruturada</div><div className="option-sublabel">Reporte técnico frequente com execução externa</div></div></button>
           </div></div>
         </section>
       )}
@@ -165,156 +194,198 @@ export default function Home() {
         <section className="step-view step-centered animate-step" id="step-processing">
           <Logo size="sm" />
           <div className="processing-bars">{[1, 2, 3, 4, 5].map(i => <div key={i} className="processing-bar" />)}</div>
-          <p className="processing-text">A analisar o seu perfil de investidor...</p>
+          <p className="processing-text">A cruzar dados de alocação com realidade de stock em Aveiro...</p>
         </section>
       )}
 
-      {/* ═══ STEP 2 — RESULTS ═══ */}
+      {/* ═══ 2. RESULTS ═══ */}
       {step === "results" && (
         <section className="step-view step-scroll animate-step" id="step-results">
           <Logo size="md" />
           <div className="step-inner">
-            <div className="verdict-card verdict-green">
-              <div className="verdict-icon">🟢</div>
+            <h2 className="section-title">Enquadramento de Mercado</h2>
+            <div className="verdict-card verdict-green" style={{ background: "rgba(37,211,102,0.05)", border: "1px solid rgba(37,211,102,0.2)" }}>
+              <div className="verdict-icon">📊</div>
               <div>
-                <h2 className="verdict-title">Sim, você deve investir em Aveiro.</h2>
-                <p className="verdict-text">Com o seu capital de <strong>{capLabel}</strong>, está numa posição privilegiada. Aveiro vive um <strong>boom de procura sem precedentes</strong> — investidores, nómadas digitais e famílias disputam um stock de imóveis cada vez mais escasso.</p>
-                <p className="verdict-text" style={{ marginTop: "0.6rem" }}>A oferta qualificada é <strong>criticamente baixa</strong>. Os melhores negócios nunca chegam aos portais — são fechados antes. <strong>Quem entra agora, entra na janela certa. Quem espera, paga mais caro.</strong></p>
+                <h2 className="verdict-title" style={{ color: "var(--gold-light)" }}>Contexto para {capLabel}</h2>
+                <p className="verdict-text">O seu escalão de capital permite acesso a operações de reconversão em zonas consolidadas de Aveiro. Atualmente, o mercado local apresenta uma <strong>taxa de absorção de stock superior a 85%</strong> nos primeiros 60 dias de exposição pública.</p>
+                <p className="verdict-text" style={{ marginTop: "0.6rem" }}>A valorização não é dependente apenas do mercado. A margem real é gerada na <strong>identificação de ativos subvalorizados por condicionantes físicas ou jurídicas</strong> que podem ser retificadas operativamente.</p>
               </div>
             </div>
-            <div className="verdict-card verdict-red">
-              <div className="verdict-icon">🔴</div>
-              <div>
-                <h3 className="verdict-title-sm">Não invista se...</h3>
-                <ul className="verdict-list">
-                  <li><span className="x-icon">✕</span>Não tem o capital realmente disponível</li>
-                  <li><span className="x-icon">✕</span>Espera lucros sem qualquer estrutura</li>
-                  <li><span className="x-icon">✕</span>Não quer trabalhar com profissionais no terreno</li>
-                </ul>
-              </div>
-            </div>
+
             <div className="spacer" />
-            <span className="label-text">📊 A Sua Simulação de Retorno</span>
+
             <div className="result-range-group">
               <div className="result-range">
-                <div className="result-range-header"><span className="result-range-label">📈 Cenário Realista</span><span className="result-range-value">{returns.realistic.minP}% – {returns.realistic.maxP}%</span></div>
+                <div className="result-range-header"><span className="result-range-label">Projeção Base (Conservadora)</span><span className="result-range-value">{returns.realistic.minP}% – {returns.realistic.maxP}%</span></div>
                 <div className="result-bar-track"><div className="result-bar-fill typical" style={{ width: `${(returns.realistic.maxP / 25) * 100}%` }} /></div>
-                <div className="result-euro">{fmt(returns.realistic.minE)} – {fmt(returns.realistic.maxE)} por ano</div>
+                <div className="result-euro">{fmt(returns.realistic.minE)} – {fmt(returns.realistic.maxE)} anuais exp.</div>
               </div>
               <div className="result-range">
-                <div className="result-range-header"><span className="result-range-label">🚀 Cenário Otimizado</span><span className="result-range-value">{returns.optimized.minP}% – {returns.optimized.maxP}%</span></div>
+                <div className="result-range-header"><span className="result-range-label">Projeção Optimizada (Operacional)</span><span className="result-range-value">{returns.optimized.minP}% – {returns.optimized.maxP}%</span></div>
                 <div className="result-bar-track"><div className="result-bar-fill upper" style={{ width: `${(returns.optimized.maxP / 25) * 100}%` }} /></div>
-                <div className="result-euro">{fmt(returns.optimized.minE)} – {fmt(returns.optimized.maxE)} por ano</div>
+                <div className="result-euro">{fmt(returns.optimized.minE)} – {fmt(returns.optimized.maxE)} anuais exp.</div>
               </div>
             </div>
-            <p className="result-note">Baseado em médias de mercado na região de Aveiro.</p>
-            <button className="btn-next" onClick={() => go("analysis")}>📊 Ver a Análise Completa do Mercado →</button>
-            <WaLink id="wa-results" />
+            <p className="result-note">Dados suportados por transações reais e custos de obra atuais no distrito.</p>
+
+            <button className="btn-next" onClick={() => go("anchor")}>Ponto de Situação Operacional →</button>
           </div>
         </section>
       )}
 
-      {/* ═══ STEP 3 — ANALYSIS ═══ */}
-      {step === "analysis" && (
-        <section className="step-view step-scroll animate-step" id="step-analysis">
+      {/* ═══ 3. REALITY ANCHOR ═══ */}
+      {step === "anchor" && (
+        <section className="step-view step-scroll animate-step" id="step-anchor">
           <Logo size="md" />
           <div className="step-inner">
-            <h2 className="section-title">📍 Porquê Aveiro? Porquê agora?</h2>
-            <p className="body-text" style={{ marginBottom: "1rem" }}>Os investidores mais inteligentes já estão a movimentar-se. Estes são os factos:</p>
-            <ul className="checklist stagger-children">
-              <li className="checklist-item"><span className="checklist-icon">✅</span>Maior valorização imobiliária de Portugal — e a acelerar</li>
-              <li className="checklist-item"><span className="checklist-icon">✅</span>Procura internacional recorde — stock a esgotar rapidamente</li>
-              <li className="checklist-item"><span className="checklist-icon">✅</span>Tech hub + universidade = emprego e talento a crescer</li>
-              <li className="checklist-item"><span className="checklist-icon">✅</span>Oferta residencial criticamente baixa — preços vão subir mais</li>
-              <li className="checklist-item"><span className="checklist-icon">✅</span>Rentabilidade consistentemente acima da média nacional</li>
-            </ul>
-            <div className="spacer-lg" />
-            <h2 className="section-title">⚠️ A maioria dos investidores <span style={{ color: "#e85d5d" }}>perde dinheiro</span></h2>
-            <p className="body-text" style={{ marginBottom: "1rem" }}>Não cometa estes erros. Saiba o que separa quem ganha de quem perde:</p>
-            <ul className="insight-list stagger-children">
-              <li className="insight-item"><span className="x-icon-lg">✕</span><span className="insight-text">Compram caro — sem análise real do valor do imóvel</span></li>
-              <li className="insight-item"><span className="x-icon-lg">✕</span><span className="insight-text">Subestimam custos — obras e imprevistos destroem a margem</span></li>
-              <li className="insight-item"><span className="x-icon-lg">✕</span><span className="insight-text">Perdem controlo — prazos derrapam, orçamentos explodem</span></li>
-              <li className="insight-item"><span className="x-icon-lg">✕</span><span className="insight-text">Vendem mal — timing errado, sem comprador, sem liquidez</span></li>
-            </ul>
-            <button className="btn-next" onClick={() => go("strategy")}>🎯 Ver as Recomendações Para Si →</button>
-            <WaLink id="wa-analysis" />
+            <div className="image-context-wrapper">
+              <Image src="/aveiro-context.png" alt="Contexto Urbano Aveiro" width={600} height={340} className="context-img" />
+            </div>
+            <div className="spacer" />
+            <h2 className="section-title">O que o mercado normalmente não mostra</h2>
+            <p className="body-text" style={{ marginBottom: "1.5rem" }}>Investimento imobiliário real não é sobre folhas de cálculo otimistas. A rentabilidade é determinada por fatores que raramente aparecem em apresentações comerciais.</p>
+
+            <div className="fact-grid">
+              <div className="fact-card">
+                <h4 className="fact-title">A margem está na compra</h4>
+                <p className="fact-desc">Contar com a valorização do mercado é especulação. O lucro deve ser garantido no momento da entrada, através de negociação direta ou correção de ineficiências do ativo.</p>
+              </div>
+              <div className="fact-card">
+                <h4 className="fact-title">Timeline vs Margem</h4>
+                <p className="fact-desc">O tempo impacta as margens mais do que o preço final de venda. Cada mês de atraso administrativo ou operacional reduz o ROI exponencialmente.</p>
+              </div>
+              <div className="fact-card">
+                <h4 className="fact-title">Fricção Administrativa</h4>
+                <p className="fact-desc">Atrasos em licenciamentos ou retificações de áreas são a realidade do terreno em Aveiro. Ignorar estas timelines altera completamente qualquer projeção inicial.</p>
+              </div>
+              <div className="fact-card">
+                <h4 className="fact-title">Risco de Execução</h4>
+                <p className="fact-desc">O principal fator de insucesso não é o mercado, é a execução. A gestão de orçamentos de obra e prazos de empreitada é onde se protege ou perde o capital.</p>
+              </div>
+            </div>
+
+            <button className="btn-next" onClick={() => go("trigger")}>Definir Abordagem Pessoal →</button>
           </div>
         </section>
       )}
 
-      {/* ═══ STEP 4 — RECOMMENDATIONS ═══ */}
+      {/* ═══ 4. SELF-IDENTIFICATION TRIGGER ═══ */}
+      {step === "trigger" && (
+        <section className="step-view step-centered animate-step" id="step-trigger">
+          <Logo size="sm" />
+          <div className="step-header">
+            <h2 className="step-question">Como costuma abordar investimento imobiliário?</h2>
+            <p className="body-text" style={{ marginTop: "0.5rem", textAlign: "center" }}>A estratégia a aplicar depende da prioridade do capital neste ciclo.</p>
+          </div>
+          <div className="step-content"><div className="options-grid stagger-children">
+            {TRIGGER_OPTIONS.map(o => (
+              <button key={o.value} className={`option-card${trigger === o.value ? " selected" : ""}`} onClick={() => selectTrigger(o.value)}>
+                <span className="option-indicator" />
+                <div><div className="option-label">{o.label}</div><div className="option-sublabel">{o.sub}</div></div>
+              </button>
+            ))}
+          </div></div>
+        </section>
+      )}
+
+      {/* ═══ 5. SILENT AUTHORITY BUILDER ═══ */}
+      {step === "authority" && (
+        <section className="step-view step-scroll animate-step" id="step-authority">
+          <Logo size="md" />
+          <div className="step-inner">
+            <h2 className="section-title">Critérios normalmente ignorados em operações residenciais</h2>
+            <p className="body-text" style={{ marginBottom: "1.5rem" }}>Uma operação sustentável em Aveiro deve validar estes pontos técnicos antes de qualquer compromisso de capital.</p>
+
+            <div className="criteria-list">
+              <div className="criteria-item"><span>Liquidez de saída</span><p>Análise de profundidade de mercado para o produto final pós-intervenção.</p></div>
+              <div className="criteria-item"><span>Margem de contingência</span><p>Reserva técnica real para variações de custos de construção e materiais.</p></div>
+              <div className="criteria-item"><span>Estrutura fiscal</span><p>Impacto de impostos (IMT, IS) e otimização em operações de reconversão.</p></div>
+              <div className="criteria-item"><span>Viabilidade urbanística</span><p>Cunformidade com o PDM atual e potencial de alteração de uso (ex: serviços para habitação).</p></div>
+              <div className="criteria-item"><span>Relação risco / tempo / capital</span><p>Cálculo de exposição ponderada ao longo de todo o ciclo operativo.</p></div>
+            </div>
+
+            <button className="btn-next" onClick={() => go("frictions")}>Analisar Fatores de Insucesso →</button>
+          </div>
+        </section>
+      )}
+
+      {/* ═══ 6. TIME & FRICTION REALITY ═══ */}
+      {step === "frictions" && (
+        <section className="step-view step-scroll animate-step" id="step-frictions">
+          <Logo size="md" />
+          <div className="step-inner">
+            <h2 className="section-title">Porque muitas operações falham fora do Excel</h2>
+            <p className="body-text" style={{ marginBottom: "1.5rem" }}>A teoria aceita tudo. A realidade do terreno impõe fricção que destrói margens teóricas.</p>
+
+            <div className="friction-grid">
+              <div className="friction-point">
+                <span className="f-icon">⚠️</span>
+                <div><strong>Custos subestimados</strong><p>Orçamentos de obra sem detalhe técnico resultam em derrapagens médias de 20% a 30%.</p></div>
+              </div>
+              <div className="friction-point">
+                <span className="f-icon">⏳</span>
+                <div><strong>Licenciamentos demorados</strong><p>Expectativas de timelines administrativos irreais bloqueiam o capital e aumentam custos financeiros.</p></div>
+              </div>
+              <div className="friction-point">
+                <span className="f-icon">🏗️</span>
+                <div><strong>Obra descontrolada</strong><p>Falta de fiscalização ativa permite falhas de execução que exigem retrabalho caro e atrasos de entrega.</p></div>
+              </div>
+              <div className="friction-point">
+                <span className="f-icon">📉</span>
+                <div><strong>Saída abaixo do esperado</strong><p>Produto final desajustado à procura real da zona obriga a correções de preço e perda de liquidez.</p></div>
+              </div>
+            </div>
+
+            <button className="btn-next" onClick={() => go("strategy")}>Visualizar Abordagem Operacional →</button>
+          </div>
+        </section>
+      )}
+
+      {/* ═══ 7. DIFFERENTIATION / STRATEGY ═══ */}
       {step === "strategy" && (
         <section className="step-view step-scroll animate-step" id="step-strategy">
           <Logo size="md" />
           <div className="step-inner">
-            <h2 className="section-title">🎯 Recomendações Para Si</h2>
-            <p className="body-text" style={{ marginBottom: "1.25rem" }}>Com base no seu perfil, estas são as nossas recomendações concretas:</p>
-
-            <div className="rec-card">
-              <span className="rec-icon">1️⃣</span>
-              <div>
-                <h3 className="rec-title">Invista apenas em ofertas fora de mercado</h3>
-                <p className="rec-text">Os melhores negócios em Aveiro nunca chegam aos portais. São negociados em privado, antes de entrar no mercado público. Só assim consegue comprar abaixo do valor real.</p>
-              </div>
-            </div>
-            <div className="rec-card">
-              <span className="rec-icon">2️⃣</span>
-              <div>
-                <h3 className="rec-title">Aposte em reconversão de imóveis com ciclos rápidos</h3>
-                <p className="rec-text">Comprar, reabilitar e vender em ciclos curtos é a estratégia com melhor relação retorno/risco em Aveiro. Evite projetos longos sem equipa estruturada.</p>
-              </div>
-            </div>
-            <div className="rec-card">
-              <span className="rec-icon">3️⃣</span>
-              <div>
-                <h3 className="rec-title">Trabalhe com quem conhece o mercado local</h3>
-                <p className="rec-text">Sem rede no terreno, perde oportunidades e comete erros caros. Ter uma equipa com operações ativas em Aveiro é a diferença entre lucrar e perder.</p>
-              </div>
-            </div>
-            <div className="rec-card">
-              <span className="rec-icon">4️⃣</span>
-              <div>
-                <h3 className="rec-title">Proteja o seu capital antes de pensar em retorno</h3>
-                <p className="rec-text">Cada operação deve ser estruturada com margem de segurança. O capital tem de estar protegido primeiro — o retorno vem a seguir, de forma natural.</p>
-              </div>
-            </div>
-
-            <div className="spacer-lg" />
             <div className="solution-block">
               <Logo size="sm" />
-              <h3 className="section-title">É exatamente isto que fazemos</h3>
-              <p className="body-text-lg">A Silvermont Capital opera exclusivamente com <strong>ofertas fora de mercado em Aveiro</strong>. A nossa metodologia: reconversão inteligente, ciclos rápidos, retornos acima da média, risco controlado.</p>
-              <p className="body-text-lg" style={{ marginTop: "0.6rem", color: "var(--gold-light)" }}>Cada recomendação acima é o que praticamos diariamente. Trabalhamos apenas com investidores qualificados.</p>
+              <h2 className="section-title">Abordagem operacional Silvermont</h2>
+              <p className="body-text" style={{ marginBottom: "1.5rem" }}>Não operamos no mercado público. A nossa estrutura está focada na resolução técnica e jurídica de ativos para criação de valor real.</p>
+
+              <ul className="op-list">
+                <li><span>Seleção cirúrgica de ativos</span>: Apenas ativos com ineficiências corrigíveis e margem de segurança mínima de 15% na compra.</li>
+                <li><span>Estruturação conservadora</span>: Projeções baseadas no pior cenário de timeline e custos.</li>
+                <li><span>Plaeamento de saída</span>: Buyer persona identificada antes da aquisição do imóvel.</li>
+                <li><span>Controlo de execução</span>: Gestão direta de equipas de obra e processos administrativos.</li>
+              </ul>
             </div>
 
-            <button className="btn-next" onClick={() => go("final")}>🔑 Ver Oportunidades Exclusivas →</button>
-            <WaLink id="wa-strategy" />
+            <button className="btn-next" onClick={() => go("final")}>Solicitar Acesso a Oportunidades →</button>
           </div>
         </section>
       )}
 
-      {/* ═══ STEP 5 — FINAL ═══ */}
+      {/* ═══ 8. FINAL CTA ═══ */}
       {step === "final" && (
         <section className="step-view step-centered animate-step" id="step-final">
           <Logo size="lg" onClick={restart} />
           <div className="step-inner" style={{ textAlign: "center", maxWidth: "520px" }}>
             <h2 className="section-title" style={{ textAlign: "center" }}>
-              Oportunidades Exclusivas <span className="gold-highlight">Fora de Mercado</span> em Aveiro
+              Acesso a oportunidades que passam nos nossos <span className="gold-highlight">critérios internos</span>
             </h2>
             <p className="body-text-lg" style={{ textAlign: "center", marginBottom: "0.5rem" }}>
-              Imóveis que nunca chegam aos portais. Operações validadas. Retornos acima da média.
+              Ativos off-market validados pela nossa equipa de terreno. Sem listas públicas. Sem envios massificados.
             </p>
-            <p className="urgency-text">⚡ Vagas limitadas por trimestre — apenas investidores qualificados</p>
-            <div style={{ marginTop: "1.25rem" }}>
+            <p className="urgency-text">⚡ Capacidade de análise limitada por trimestre</p>
+            <div style={{ marginTop: "1.5rem" }}>
               <a href={WA_URL} target="_blank" rel="noopener noreferrer" className="btn-final-wa" id="wa-final">
                 <WaIcon s={22} />
-                <span>Receber Oportunidades Fora de Mercado</span>
+                <span>Discutir Oportunidades Off-Market</span>
               </a>
             </div>
-            <p className="micro-text" style={{ marginTop: "1rem" }}>Resposta em menos de 2h · Sem compromisso · Gratuito</p>
+            <p className="micro-text" style={{ marginTop: "1rem" }}>Apenas para investidores com capital verificado e horizonte temporal definido.</p>
             <button className="btn-save" onClick={() => { if (navigator.clipboard) navigator.clipboard.writeText(window.location.href); setCopied(true); setTimeout(() => setCopied(false), 2500); }}>
-              {copied ? "✓ Link copiado!" : "📎 Guardar link para consultar depois"}
+              {copied ? "✓ Link copiado!" : "📎 Guardar acesso para consulta posterior"}
             </button>
           </div>
         </section>
