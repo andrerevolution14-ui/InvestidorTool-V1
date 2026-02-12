@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════
-   SILVERMONT CAPITAL – Funnel V5
+   SILVERMONT CAPITAL – Funnel V6
    Clean · Readable · Premium
    ═══════════════════════════════════════ */
 
@@ -70,7 +70,7 @@ body::after {
   z-index: 0;
 }
 
-/* ── Typography – LARGE & READABLE ── */
+/* ── Typography ── */
 h1,
 h2,
 h3 {
@@ -171,7 +171,6 @@ h3 {
   max-width: var(--content-max);
 }
 
-/* ── Step Animation ── */
 .animate-step {
   animation: step-enter 350ms var(--ease-out) both;
 }
@@ -188,49 +187,31 @@ h3 {
   }
 }
 
-/* ── Logo – Clean Badge on Dark BG ── */
+/* ── Logo – Dark BG Image, No Badge ── */
 .step-logo {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.75rem;
   text-align: center;
-}
-
-.logo-badge {
-  display: inline-block;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 14px;
-  padding: 10px 22px;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.2);
-}
-
-.logo-badge-lg {
-  padding: 14px 30px;
-  border-radius: 16px;
-}
-
-.logo-badge-sm {
-  padding: 8px 16px;
-  border-radius: 12px;
 }
 
 .logo-img {
   display: block;
   object-fit: contain;
-  width: 100%;
-  height: auto;
+  margin: 0 auto;
+  border-radius: 6px;
 }
 
-.logo-badge-lg .logo-img {
-  width: clamp(220px, 50vw, 340px) !important;
+.logo-lg {
+  width: clamp(260px, 55vw, 400px) !important;
   height: auto !important;
 }
 
-.logo-badge-md .logo-img {
-  width: clamp(180px, 36vw, 280px) !important;
+.logo-md {
+  width: clamp(200px, 42vw, 320px) !important;
   height: auto !important;
 }
 
-.logo-badge-sm .logo-img {
-  width: clamp(130px, 28vw, 200px) !important;
+.logo-sm {
+  width: clamp(160px, 32vw, 240px) !important;
   height: auto !important;
 }
 
@@ -319,58 +300,47 @@ h3 {
   box-shadow: 0 8px 32px rgba(212, 168, 67, 0.35);
 }
 
-/* Mid WA – wide, centered, green, compact */
-.btn-wa-mid {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.55rem;
-  padding: 0.7rem 1.8rem;
-  background: linear-gradient(135deg, #25d366, #1da851);
-  color: #fff;
-  font-family: inherit;
-  font-size: 0.92rem;
-  font-weight: 600;
-  border: none;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all 200ms var(--ease-smooth);
-  text-decoration: none;
-  box-shadow: 0 2px 12px rgba(37, 211, 102, 0.2);
-  width: 100%;
-  max-width: 420px;
-}
-
-.btn-wa-mid:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 20px rgba(37, 211, 102, 0.3);
-}
-
-/* Continue / Next – subtle gold outline, compact */
+/* Continue / Next – gold bg, colorful, compact */
 .btn-next {
   display: block;
   width: 100%;
-  margin-top: 1rem;
-  padding: 0.72rem 1.5rem;
-  background: transparent;
-  color: var(--gold-light);
+  margin-top: 1.5rem;
+  padding: 0.85rem 1.8rem;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+  color: #0f0f12;
   font-family: inherit;
-  font-size: 0.95rem;
-  font-weight: 600;
-  border: 1.5px solid var(--border-gold);
+  font-size: 1rem;
+  font-weight: 700;
+  border: none;
   border-radius: var(--radius-md);
   cursor: pointer;
   text-align: center;
   transition: all 200ms var(--ease-smooth);
+  letter-spacing: 0.01em;
 }
 
 .btn-next:hover {
-  background: var(--gold-subtle);
-  border-color: var(--gold-light);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(212, 168, 67, 0.3);
 }
 
-/* Final CTA – green, prominent but compact */
+/* Subtle WA link – no green, just text */
+.wa-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--text-tertiary);
+  font-family: inherit;
+  font-size: 0.88rem;
+  text-decoration: none;
+  transition: color 200ms;
+}
+
+.wa-link:hover {
+  color: var(--text-secondary);
+}
+
+/* Final CTA – green, prominent */
 .btn-final-wa {
   display: inline-flex;
   align-items: center;
@@ -816,6 +786,46 @@ h3 {
   line-height: 1.55;
 }
 
+/* ── Recommendation Cards ── */
+.rec-card {
+  display: flex;
+  gap: 1rem;
+  padding: 1.3rem 1.4rem;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-card);
+  border-radius: var(--radius-md);
+  margin-bottom: 0.85rem;
+  align-items: flex-start;
+}
+
+.rec-icon {
+  font-size: 1.35rem;
+  flex-shrink: 0;
+  line-height: 1.2;
+}
+
+.rec-title {
+  font-size: 1.08rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.3rem;
+}
+
+.rec-text {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* ── Solution Block ── */
+.solution-block {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-gold);
+  border-radius: var(--radius-lg);
+  padding: 2rem 1.75rem;
+  margin-top: 0.5rem;
+}
+
 /* ── Profile & Strategy ── */
 .profile-card {
   background: var(--bg-card);
@@ -900,10 +910,6 @@ h3 {
     font-size: 1.02rem;
   }
 
-  .btn-wa-mid {
-    max-width: 100%;
-  }
-
   .btn-final-wa {
     width: 100%;
     padding: 0.9rem 1.5rem;
@@ -911,8 +917,8 @@ h3 {
   }
 
   .btn-next {
-    font-size: 0.9rem;
-    padding: 0.65rem 1.2rem;
+    font-size: 0.95rem;
+    padding: 0.8rem 1.4rem;
   }
 
   .verdict-card {
@@ -921,20 +927,30 @@ h3 {
     padding: 1.15rem;
   }
 
-  .logo-badge-lg .logo-img {
-    width: clamp(200px, 60vw, 300px) !important;
+  .rec-card {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1.15rem;
   }
 
-  .logo-badge-md .logo-img {
-    width: clamp(160px, 44vw, 240px) !important;
+  .logo-lg {
+    width: clamp(220px, 65vw, 340px) !important;
   }
 
-  .logo-badge-sm .logo-img {
-    width: clamp(120px, 32vw, 170px) !important;
+  .logo-md {
+    width: clamp(180px, 50vw, 280px) !important;
+  }
+
+  .logo-sm {
+    width: clamp(140px, 38vw, 210px) !important;
   }
 
   .headline-hero {
     font-size: clamp(1.8rem, 7vw, 2.5rem);
+  }
+
+  .solution-block {
+    padding: 1.5rem 1.25rem;
   }
 }
 
