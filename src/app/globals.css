@@ -197,21 +197,24 @@ h3 {
   display: block;
   object-fit: contain;
   margin: 0 auto;
-  border-radius: 6px;
+}
+
+.logo-blend {
+  mix-blend-mode: lighten;
 }
 
 .logo-lg {
-  width: clamp(260px, 55vw, 400px) !important;
+  width: clamp(280px, 60vw, 440px) !important;
   height: auto !important;
 }
 
 .logo-md {
-  width: clamp(200px, 42vw, 320px) !important;
+  width: clamp(220px, 48vw, 360px) !important;
   height: auto !important;
 }
 
 .logo-sm {
-  width: clamp(160px, 32vw, 240px) !important;
+  width: clamp(180px, 36vw, 280px) !important;
   height: auto !important;
 }
 
@@ -324,20 +327,26 @@ h3 {
   box-shadow: 0 6px 24px rgba(212, 168, 67, 0.3);
 }
 
-/* Subtle WA link – no green, just text */
-.wa-link {
+/* WA pill – visible, clickable, no green fill */
+.wa-pill {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  color: var(--text-tertiary);
+  gap: 0.45rem;
+  padding: 0.55rem 1.3rem;
+  color: var(--text-secondary);
   font-family: inherit;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
+  font-weight: 500;
   text-decoration: none;
-  transition: color 200ms;
+  border: 1px solid var(--border-card);
+  border-radius: 100px;
+  transition: all 200ms var(--ease-smooth);
 }
 
-.wa-link:hover {
-  color: var(--text-secondary);
+.wa-pill:hover {
+  border-color: var(--border-gold);
+  color: var(--text-primary);
+  background: var(--gold-subtle);
 }
 
 /* Final CTA – green, prominent */
@@ -934,15 +943,15 @@ h3 {
   }
 
   .logo-lg {
-    width: clamp(220px, 65vw, 340px) !important;
+    width: clamp(240px, 70vw, 380px) !important;
   }
 
   .logo-md {
-    width: clamp(180px, 50vw, 280px) !important;
+    width: clamp(200px, 55vw, 320px) !important;
   }
 
   .logo-sm {
-    width: clamp(140px, 38vw, 210px) !important;
+    width: clamp(160px, 44vw, 250px) !important;
   }
 
   .headline-hero {
