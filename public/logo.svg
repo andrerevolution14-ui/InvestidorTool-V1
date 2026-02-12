@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 280" fill="none">
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e8c35a"/>
+      <stop offset="50%" stop-color="#d4a843"/>
+      <stop offset="100%" stop-color="#b8922e"/>
+    </linearGradient>
+    <linearGradient id="goldLight" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f0d060"/>
+      <stop offset="100%" stop-color="#d4a843"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Shield -->
+  <path d="M200 30 L240 50 L240 100 Q240 140 200 160 Q160 140 160 100 L160 50 Z" 
+        fill="none" stroke="url(#gold)" stroke-width="3"/>
+  <path d="M200 38 L234 55 L234 98 Q234 133 200 152 Q166 133 166 98 L166 55 Z" 
+        fill="none" stroke="url(#gold)" stroke-width="1.5" opacity="0.5"/>
+  
+  <!-- S Letter -->
+  <text x="200" y="115" text-anchor="middle" font-family="Georgia, serif" font-size="52" font-weight="bold" fill="url(#goldLight)">S</text>
+  
+  <!-- Left Laurel -->
+  <g opacity="0.85">
+    <path d="M148 70 Q130 80 125 100" fill="none" stroke="url(#gold)" stroke-width="1.5"/>
+    <path d="M145 80 Q128 85 120 105" fill="none" stroke="url(#gold)" stroke-width="1.5"/>
+    <path d="M140 92 Q125 95 117 112" fill="none" stroke="url(#gold)" stroke-width="1.5"/>
+    <path d="M138 105 Q124 108 118 122" fill="none" stroke="url(#gold)" stroke-width="1.5"/>
+    <path d="M138 118 Q126 120 122 133" fill="none" stroke="url(#gold)" stroke-width="1.5"/>
+    <ellipse cx="123" cy="98" rx="6" ry="10" fill="url(#gold)" opacity="0.3" transform="rotate(-15 123 98)"/>
+    <ellipse cx="118" cy="112" rx="5" ry="9" fill="url(#gold)" opacity="0.3" transform="rotate(-10 118 112)"/>
+    <ellipse cx="120" cy="126" rx="5" ry="8" fill="url(#gold)" opacity="0.3" transform="rotate(-5 120 126)"/>
+  </g>
+  
+  <!-- Right Laurel -->
+  <g opacity="0.85">
+    <path d="M252 70 Q270 80 275 100" fill="none" stroke="url(#gold)" stroke-width="1.5"/>
+    <path d="M255 80 Q272 85 280 105" fill="none" stroke="url(#gold)" stroke-width="1.5"/>
+    <path d="M260 92 Q275 95 283 112" fill="none" stroke="url(#gold)" stroke-width="1.5"/>
+    <path d="M262 105 Q276 108 282 122" fill="none" stroke="url(#gold)" stroke-width="1.5"/>
+    <path d="M262 118 Q274 120 278 133" fill="none" stroke="url(#gold)" stroke-width="1.5"/>
+    <ellipse cx="277" cy="98" rx="6" ry="10" fill="url(#gold)" opacity="0.3" transform="rotate(15 277 98)"/>
+    <ellipse cx="282" cy="112" rx="5" ry="9" fill="url(#gold)" opacity="0.3" transform="rotate(10 282 112)"/>
+    <ellipse cx="280" cy="126" rx="5" ry="8" fill="url(#gold)" opacity="0.3" transform="rotate(5 280 126)"/>
+  </g>
+  
+  <!-- SILVERMONT text -->
+  <text x="200" y="210" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="38" font-weight="400" letter-spacing="6" fill="url(#goldLight)">SILVERMONT</text>
+  
+  <!-- Decorative lines -->
+  <line x1="110" y1="230" x2="165" y2="230" stroke="url(#gold)" stroke-width="1" opacity="0.6"/>
+  <line x1="235" y1="230" x2="290" y2="230" stroke="url(#gold)" stroke-width="1" opacity="0.6"/>
+  
+  <!-- CAPITAL text -->
+  <text x="200" y="248" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="16" font-weight="400" letter-spacing="8" fill="url(#gold)" opacity="0.8">CAPITAL</text>
+</svg>
