@@ -98,19 +98,7 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(SESSION_KEY);
-      if (raw) {
-        const s = JSON.parse(raw);
-        if (s.step && s.step !== "processing") {
-          setStep(s.step);
-          setCapital(s.capital || "");
-          setHorizon(s.horizon || "");
-          setMindset(s.mindset || "");
-          setProfile(s.profile || "");
-        }
-      }
-    } catch { }
+    // Always start at hero for new visits
     setReady(true);
   }, []);
 
@@ -173,7 +161,7 @@ export default function Home() {
           <p className="subheadline">+12% valorização anual. Procura recorde. Stock limitado. Descubra em 30 segundos se faz sentido para si.</p>
 
           <div className="context-image-break" style={{ marginTop: "1.5rem", marginBottom: "1.5rem" }}>
-            <img src="/aveiro-1.png" alt="Aveiro" className="context-img-full" />
+            <img src="/aveiro-1.png" alt="Aveiro" className="context-img-full" loading="eager" fetchPriority="high" />
           </div>
 
           <div className="hero-value-list">
@@ -181,7 +169,7 @@ export default function Home() {
             <div className="hero-value-item"><span className="hv-icon">🟢</span><span>Guia: Deve ou não investir em Aveiro</span></div>
             <div className="hero-value-item"><span className="hv-icon">🔑</span><span>Acesso a oportunidades fora de mercado</span></div>
           </div>
-          <button className="btn-primary" onClick={() => go("q1")} id="cta-start">Iniciar JÁ a Minha Simulação Gratuita →</button>
+          <button className="btn-primary" onClick={() => go("q1")} id="cta-start">Iniciar a Minha Simulação Gratuita →</button>
           <p className="micro-text" style={{ marginTop: "0.75rem" }}>Sem compromisso · Resultado imediato</p>
         </section>
       )}
@@ -262,21 +250,21 @@ export default function Home() {
           <Logo size="md" />
           <div className="step-inner">
             <div className="verdict-card verdict-green">
-              <div className="verdict-icon">🟢</div>
+              <div className="verdict-icon">✓</div>
               <div>
-                <h2 className="verdict-title">Sim, você deve investir em Aveiro.</h2>
-                <p className="verdict-text">Com o seu capital de <strong>{capLabel}</strong>, está numa posição privilegiada. Aveiro vive um <strong>boom de procura sem precedentes</strong> — investidores, nómadas digitais e famílias disputam um stock de imóveis cada vez mais escasso.</p>
-                <p className="verdict-text" style={{ marginTop: "0.6rem" }}>A oferta qualificada é <strong>criticamente baixa</strong>. Os melhores negócios nunca chegam aos portais — são fechados antes. <strong>Quem entra agora, entra na janela certa. Quem espera, paga mais caro.</strong></p>
+                <h2 className="verdict-title">Sim. Deve investir em Aveiro.</h2>
+                <p className="verdict-text">Com <strong>{capLabel}</strong>, está posicionado para capitalizar o boom. Aveiro vive procura sem precedentes — investidores, nómadas digitais, famílias. Todos disputam stock cada vez mais escasso.</p>
+                <p className="verdict-text" style={{ marginTop: "0.6rem" }}>Oferta qualificada? <strong>Criticamente baixa.</strong> Os melhores negócios nunca chegam aos portais. São fechados antes. <strong>Quem entra agora, entra cedo. Quem espera, paga o dobro.</strong></p>
               </div>
             </div>
             <div className="verdict-card verdict-red">
-              <div className="verdict-icon">🔴</div>
+              <div className="verdict-icon">✕</div>
               <div>
                 <h3 className="verdict-title-sm">Não invista se...</h3>
                 <ul className="verdict-list">
-                  <li><span className="x-icon">✕</span>Não tem o capital realmente disponível</li>
-                  <li><span className="x-icon">✕</span>Espera lucros sem qualquer estrutura</li>
-                  <li><span className="x-icon">✕</span>Não quer trabalhar com profissionais no terreno</li>
+                  <li><span className="x-icon">✕</span>Não tem capital realmente disponível</li>
+                  <li><span className="x-icon">✕</span>Espera lucros sem estrutura profissional</li>
+                  <li><span className="x-icon">✕</span>Não quer trabalhar com operadores no terreno</li>
                 </ul>
               </div>
             </div>
@@ -295,7 +283,7 @@ export default function Home() {
               </div>
             </div>
             <p className="result-note">Baseado em médias de mercado na região de Aveiro.</p>
-            <button className="btn-next" onClick={() => go("anchoring")}>⚓ Ver Análise de Realidade →</button>
+            <button className="btn-next" onClick={() => go("anchoring")}>Ver Análise de Realidade →</button>
             <WaLink id="wa-results" />
           </div>
         </section>
@@ -306,7 +294,7 @@ export default function Home() {
         <section className="step-view step-scroll animate-step" id="step-anchoring">
           <Logo size="md" />
           <div className="step-inner">
-            <h2 className="section-title">⚓ Realidade prática do mercado</h2>
+            <h2 className="section-title">Realidade prática do mercado</h2>
             <div className="info-grid">
               <div className="info-card">
                 <div className="info-icon">💰</div>
@@ -327,10 +315,10 @@ export default function Home() {
             </div>
 
             <div className="context-image-break">
-              <img src="/aveiro-2.jpg" alt="Aveiro Context" className="context-img-full" />
+              <img src="/aveiro-2.jpg" alt="Aveiro Context" className="context-img-full" loading="lazy" />
             </div>
 
-            <button className="btn-next" onClick={() => go("rational")}>🔍 Analisar Variáveis Críticas →</button>
+            <button className="btn-next" onClick={() => go("rational")}>Analisar Variáveis Críticas →</button>
             <WaLink id="wa-anchoring" />
           </div>
         </section>
@@ -343,7 +331,7 @@ export default function Home() {
           <div className="step-inner">
 
             {/* Asymmetric staggered layout */}
-            <h2 className="section-title" style={{ textAlign: "left" }}>🔍 Variáveis que definem a viabilidade real</h2>
+            <h2 className="section-title" style={{ textAlign: "left" }}>Variáveis que definem viabilidade real</h2>
             <div className="staggered-grid">
               <div className="stagger-card stagger-left">
                 <div className="stagger-icon">💧</div>
@@ -390,13 +378,13 @@ export default function Home() {
             </div>
 
             <div className="context-image-break">
-              <img src="/aveiro-3.jpg" alt="Aveiro Analysis" className="context-img-full" />
+              <img src="/aveiro-3.jpg" alt="Aveiro Analysis" className="context-img-full" loading="lazy" />
             </div>
 
             <div className="spacer-lg" />
 
             {/* Timeline vertical flow */}
-            <h2 className="section-title" style={{ textAlign: "right" }}>⚠️ Onde muitas operações perdem margem</h2>
+            <h2 className="section-title" style={{ textAlign: "right" }}>Onde operações perdem margem</h2>
             <div className="timeline-flow">
               <div className="timeline-item">
                 <div className="timeline-marker">💸</div>
@@ -434,7 +422,7 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            <button className="btn-next" onClick={() => go("analysis")}>📍 Porquê Aveiro Agora? →</button>
+            <button className="btn-next" onClick={() => go("analysis")}>Porquê Aveiro Agora? →</button>
             <WaLink id="wa-rational" />
           </div>
         </section>
@@ -445,8 +433,8 @@ export default function Home() {
         <section className="step-view step-scroll animate-step" id="step-analysis">
           <Logo size="md" />
           <div className="step-inner">
-            <h2 className="section-title">📍 Porquê Aveiro? Porquê agora?</h2>
-            <p className="body-text" style={{ marginBottom: "1rem" }}>Os investidores inteligentes já estão a movimentar-se:</p>
+            <h2 className="section-title">Porquê Aveiro? Porquê agora?</h2>
+            <p className="body-text" style={{ marginBottom: "1rem" }}>Investidores inteligentes já se movimentaram:</p>
             <ul className="checklist stagger-children">
               <li className="checklist-item"><span className="checklist-icon">✅</span>Maior valorização imobiliária — em aceleração</li>
               <li className="checklist-item"><span className="checklist-icon">✅</span>Procura internacional recorde</li>
@@ -454,13 +442,13 @@ export default function Home() {
               <li className="checklist-item"><span className="checklist-icon">✅</span>Oferta residencial criticamente baixa</li>
             </ul>
             <div className="spacer-lg" />
-            <h2 className="section-title">⚠️ A maioria perde dinheiro</h2>
+            <h2 className="section-title">A maioria perde dinheiro</h2>
             <ul className="insight-list stagger-children">
               <li className="insight-item"><span className="x-icon-lg">✕</span><span className="insight-text">Compram caro — sem análise de valor real</span></li>
               <li className="insight-item"><span className="x-icon-lg">✕</span><span className="insight-text">Subestimam custos de obra e imprevistos</span></li>
               <li className="insight-item"><span className="x-icon-lg">✕</span><span className="insight-text">Perdem controlo sobre prazos e orçamentos</span></li>
             </ul>
-            <button className="btn-next" onClick={() => go("strategy")}>🎯 Ver Recomendações Estratégicas →</button>
+            <button className="btn-next" onClick={() => go("strategy")}>Ver Recomendações Estratégicas →</button>
             <WaLink id="wa-analysis" />
           </div>
         </section>
@@ -471,30 +459,30 @@ export default function Home() {
         <section className="step-view step-scroll animate-step" id="step-strategy">
           <Logo size="md" />
           <div className="step-inner">
-            <h2 className="section-title">🎯 Recomendações Estratégicas</h2>
+            <h2 className="section-title">Recomendações Estratégicas</h2>
             <div className="rec-card">
-              <span className="rec-icon">1️⃣</span>
+              <span className="rec-icon">1</span>
               <div>
                 <h3 className="rec-title">Invista em ofertas fora de mercado</h3>
                 <p className="rec-text">Os melhores negócios em Aveiro são negociados em privado, antes de entrar no mercado público.</p>
               </div>
             </div>
             <div className="rec-card">
-              <span className="rec-icon">2️⃣</span>
+              <span className="rec-icon">2</span>
               <div>
-                <h3 className="rec-title">Foco em reconversão com ciclos rápidos</h3>
-                <p className="rec-text">Ciclos curtos oferecem melhor relação retorno/risco. Evite projetos longos sem equipa local.</p>
+                <h3 className="rec-title">Foco em reconversão rápida</h3>
+                <p className="rec-text">Ciclos curtos = melhor relação retorno/risco. Evite projetos longos sem equipa local.</p>
               </div>
             </div>
             <div className="rec-card">
-              <span className="rec-icon">3️⃣</span>
+              <span className="rec-icon">3</span>
               <div>
-                <h3 className="rec-title">Proteja o capital antes do retorno</h3>
-                <p className="rec-text">Cada operação deve ter margem de segurança. O capital tem de estar protegido primeiro.</p>
+                <h3 className="rec-title">Capital protegido primeiro</h3>
+                <p className="rec-text">Margem de segurança em cada operação. Capital protegido {'>'} retorno especulativo.</p>
               </div>
             </div>
 
-            <button className="btn-next" onClick={() => go("presentation")}>🏗️ Ver Abordagem no Terreno →</button>
+            <button className="btn-next" onClick={() => go("presentation")}>Ver Abordagem no Terreno →</button>
             <WaLink id="wa-strategy" />
           </div>
         </section>
@@ -506,55 +494,55 @@ export default function Home() {
           <Logo size="md" />
           <div className="step-inner">
 
-            <h2 className="section-title">🎯 Abordagem operacional em Aveiro</h2>
+            <h2 className="section-title">A nossa abordagem operacional em Aveiro</h2>
             <div className="approach-detailed">
               <div className="approach-item">
                 <div className="approach-header">
                   <span className="approach-icon">🔎</span>
-                  <h3 className="approach-title">Seleção criteriosa de ativos</h3>
+                  <h3 className="approach-title">Seleção criteriosa</h3>
                 </div>
-                <p className="approach-desc">Apenas ativos com potencial comprovado, fora de mercado, em zonas de valorização acelerada. Filtramos 95% das oportunidades antes de apresentar.</p>
+                <p className="approach-desc">Apenas ativos com potencial comprovado. Fora de mercado. Zonas de valorização acelerada. Filtramos 95% antes de apresentar.</p>
               </div>
               <div className="approach-item">
                 <div className="approach-header">
-                  <span className="approach-icon">🏛️</span>
+                  <span className="approach-icon">🏛</span>
                   <h3 className="approach-title">Estruturação conservadora</h3>
                 </div>
-                <p className="approach-desc">Capital protegido primeiro, retorno depois. Margens de segurança em todos os cenários, mesmo nos pessimistas.</p>
+                <p className="approach-desc">Capital protegido primeiro. Retorno depois. Margens de segurança em todos os cenários — mesmo nos pessimistas.</p>
               </div>
               <div className="approach-item">
                 <div className="approach-header">
-                  <span className="approach-icon">🛡️</span>
+                  <span className="approach-icon">🛡</span>
                   <h3 className="approach-title">Margens de segurança</h3>
                 </div>
-                <p className="approach-desc">Buffer financeiro para imprevistos, atrasos e correções de mercado. Não trabalhamos com orçamentos justos.</p>
+                <p className="approach-desc">Buffer para imprevistos, atrasos, correções de mercado. Nunca trabalhamos com orçamentos justos.</p>
               </div>
               <div className="approach-item">
                 <div className="approach-header">
-                  <span className="approach-icon">🗺️</span>
+                  <span className="approach-icon">🗺</span>
                   <h3 className="approach-title">Planeamento de saída</h3>
                 </div>
-                <p className="approach-desc">Estratégia de saída definida antes da compra. Sabemos a quem vender, quando e por quanto, antes de entrar.</p>
+                <p className="approach-desc">Estratégia de saída definida antes da compra. Sabemos a quem vender, quando, por quanto — antes de entrar.</p>
               </div>
               <div className="approach-item">
                 <div className="approach-header">
-                  <span className="approach-icon">✅</span>
-                  <h3 className="approach-title">Controlo de execução no terreno</h3>
+                  <span className="approach-icon">✓</span>
+                  <h3 className="approach-title">Controlo de execução</h3>
                 </div>
-                <p className="approach-desc">Equipa local em Aveiro. Acompanhamento semanal de obra, licenciamentos e prazos. Problemas resolvidos antes de escalarem.</p>
+                <p className="approach-desc">Equipa local em Aveiro. Acompanhamento semanal: obra, licenciamentos, prazos. Problemas resolvidos antes de escalarem.</p>
               </div>
             </div>
 
             <div className="context-image-break">
-              <img src="/aveiro-4.png" alt="Aveiro Territory" className="context-img-full" />
+              <img src="/aveiro-4.png" alt="Aveiro Territory" className="context-img-full" loading="lazy" />
             </div>
 
             <div className="spacer-lg" />
 
             <div className="user-photo-card">
               <div className="photo-with-logo">
-                <img src="/user-photo.jpg" alt="Estrategista" className="user-photo-img" />
-                <img src="/logo-horizontal.png" alt="Silvermont Capital" className="photo-logo-xl" />
+                <img src="/user-photo.jpg" alt="Estrategista" className="user-photo-img" loading="lazy" />
+                <img src="/logo-horizontal.png" alt="Silvermont Capital" className="photo-logo-xl" loading="lazy" />
               </div>
               <div className="user-photo-info">
                 <span className="user-photo-name">Estrategista de Operações</span>
@@ -564,10 +552,12 @@ export default function Home() {
 
             <div className="solution-block">
               <h3 className="section-title">Metodologia Silvermont</h3>
-              <p className="body-text-lg">Operamos exclusivamente com <strong>ofertas fora de mercado</strong>. Reconversão inteligente, ciclos rápidos e risco controlado.</p>
+              <p className="body-text-lg">Não trabalhamos como os outros. <strong>Zero portais. Zero ofertas públicas.</strong></p>
+              <p className="body-text-lg" style={{ marginTop: "0.75rem" }}>Cada operação é estruturada ao detalhe. Cada variável, controlada. Cada risco, mitigado. <strong>Não vendemos sonhos. Entregamos operações blindadas.</strong></p>
+              <p className="body-text-lg" style={{ marginTop: "0.75rem" }}>Reconversão inteligente. Ciclos rápidos. Risco controlado. <strong>Esta é a diferença entre amadores e operadores profissionais.</strong></p>
             </div>
 
-            <button className="btn-next" onClick={() => go("final")}>🔑 Aceder às Oportunidades Exclusivas →</button>
+            <button className="btn-next" onClick={() => go("final")}>Aceder às Oportunidades Exclusivas →</button>
             <WaLink id="wa-presentation" />
           </div>
         </section>
