@@ -5,7 +5,7 @@ import Image from "next/image";
 import ProgressBar from "@/components/ProgressBar";
 import { saveLeadAction } from "./actions";
 
-type Step = "hero" | "q1" | "q2" | "q3" | "processing" | "results" | "analysis" | "strategy" | "final";
+type Step = "hero" | "q1" | "q2" | "q3" | "q4" | "processing" | "results" | "anchoring" | "rational" | "analysis" | "strategy" | "presentation" | "final";
 
 const SESSION_KEY = "silvermont_funnel";
 const WA_NUM = "351XXXXXXXXX";
@@ -28,18 +28,38 @@ const MINDSET_OPTIONS = [
   { value: "active", label: "Gosto de acompanhar e decidir", sub: "Envolvido no processo" },
   { value: "hybrid", label: "Acompanhar com equipa profissional", sub: "Visibilidade total, execução delegada" },
 ];
+const PROFILE_OPTIONS = [
+  { value: "preservacao", label: "Preservação de capital" },
+  { value: "crescimento", label: "Crescimento gradual" },
+  { value: "oportunistica", label: "Estratégias oportunísticas" },
+  { value: "analise", label: "Apenas a analisar mercado" },
+];
 
 function fmt(n: number) { return "€" + n.toLocaleString("pt-PT"); }
 function getUserStep(s: Step): { n: number; t: number } | null {
   if (s === "hero" || s === "processing") return null;
-  if (s === "q1" || s === "q2" || s === "q3") return { n: 1, t: 5 };
-  if (s === "results") return { n: 2, t: 5 };
-  if (s === "analysis") return { n: 3, t: 5 };
-  if (s === "strategy") return { n: 4, t: 5 };
-  return { n: 5, t: 5 };
+  if (s === "q1" || s === "q2" || s === "q3" || s === "q4") return { n: 1, t: 8 };
+  if (s === "results") return { n: 2, t: 8 };
+  if (s === "anchoring") return { n: 3, t: 8 };
+  if (s === "rational") return { n: 4, t: 8 };
+  if (s === "analysis") return { n: 5, t: 8 };
+  if (s === "strategy") return { n: 6, t: 8 };
+  if (s === "presentation") return { n: 7, t: 8 };
+  return { n: 8, t: 8 };
 }
 function getProgress(s: Step): number {
-  const m: Record<Step, number> = { hero: 0, q1: 10, q2: 18, q3: 26, processing: 38, results: 52, analysis: 68, strategy: 84, final: 100 };
+  const m: Record<Step, number> = {
+    hero: 0,
+    q1: 8, q2: 16, q3: 24, q4: 32,
+    processing: 40,
+    results: 50,
+    anchoring: 60,
+    rational: 70,
+    analysis: 80,
+    strategy: 88,
+    presentation: 94,
+    final: 100
+  };
   return m[s];
 }
 function getReturns(cap: string, hor: string) {
@@ -80,22 +100,60 @@ export default function Home() {
   const [capital, setCapital] = useState("");
   const [horizon, setHorizon] = useState("");
   const [mindset, setMindset] = useState("");
+  const [profile, setProfile] = useState("");
   const [ready, setReady] = useState(false);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    try { const raw = localStorage.getItem(SESSION_KEY); if (raw) { const s = JSON.parse(raw); if (s.step && s.step !== "processing") { setStep(s.step); setCapital(s.capital || ""); setHorizon(s.horizon || ""); setMindset(s.mindset || ""); } } } catch { }
+    try {
+      const raw = localStorage.getItem(SESSION_KEY);
+      if (raw) {
+        const s = JSON.parse(raw);
+        if (s.step && s.step !== "processing") {
+          setStep(s.step);
+          setCapital(s.capital || "");
+          setHorizon(s.horizon || "");
+          setMindset(s.mindset || "");
+          setProfile(s.profile || "");
+        }
+      }
+    } catch { }
     setReady(true);
   }, []);
+
   useEffect(() => {
     if (!ready) return;
-    try { localStorage.setItem(SESSION_KEY, JSON.stringify({ step, capital, horizon, mindset, ts: Date.now() })); } catch { }
-  }, [step, capital, horizon, mindset, ready]);
+    try {
+      localStorage.setItem(SESSION_KEY, JSON.stringify({
+        step, capital, horizon, mindset, profile, ts: Date.now()
+      }));
+    } catch { }
+  }, [step, capital, horizon, mindset, profile, ready]);
 
-  const go = useCallback((s: Step) => { setStep(s); window.scrollTo({ top: 0, behavior: "smooth" }); }, []);
-  const restart = useCallback(() => { localStorage.removeItem(SESSION_KEY); setCapital(""); setHorizon(""); setMindset(""); go("hero"); }, [go]);
-  const selectCapital = useCallback((v: string) => { setCapital(v); setTimeout(() => go("q2"), 200); }, [go]);
-  const selectHorizon = useCallback((v: string) => { setHorizon(v); setTimeout(() => go("q3"), 200); }, [go]);
+  const go = useCallback((s: Step) => {
+    setStep(s);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
+  const restart = useCallback(() => {
+    localStorage.removeItem(SESSION_KEY);
+    setCapital("");
+    setHorizon("");
+    setMindset("");
+    setProfile("");
+    go("hero");
+  }, [go]);
+
+  const selectCapital = useCallback((v: string) => {
+    setCapital(v);
+    setTimeout(() => go("q2"), 200);
+  }, [go]);
+
+  const selectHorizon = useCallback((v: string) => {
+    setHorizon(v);
+    setTimeout(() => go("q3"), 200);
+  }, [go]);
+
   const selectMindset = useCallback(async (v: string) => {
     setMindset(v);
     setTimeout(async () => {
@@ -118,9 +176,13 @@ export default function Home() {
       {/* ═══ HERO ═══ */}
       {step === "hero" && (
         <section className="step-view step-centered animate-step" id="hero">
-          <Logo size="lg" />
           <h1 className="headline-hero">Aveiro está a explodir.<br /><span className="gold-highlight">O seu dinheiro devia estar lá.</span></h1>
           <p className="subheadline">+12% valorização anual. Procura recorde. Stock limitado. Descubra em 30 segundos se faz sentido para si.</p>
+
+          <div className="context-image-break" style={{ marginTop: "1.5rem", marginBottom: "1.5rem" }}>
+            <img src="/aveiro-1.png" alt="Aveiro" className="context-img-full" />
+          </div>
+
           <div className="hero-value-list">
             <div className="hero-value-item"><span className="hv-icon">📊</span><span>Simulação personalizada de retorno</span></div>
             <div className="hero-value-item"><span className="hv-icon">🟢</span><span>Guia: Deve ou não investir em Aveiro</span></div>
@@ -131,32 +193,90 @@ export default function Home() {
         </section>
       )}
 
-      {/* ═══ QUIZ Q1-Q3 ═══ */}
+      {/* ═══ QUIZ Q1-Q4 ═══ */}
       {step === "q1" && (
         <section className="step-view step-centered animate-step" id="step-q1">
           <Logo size="sm" />
           <div className="step-header"><span className="step-number">Pergunta 1 de 3</span><h2 className="step-question">Quanto capital tem disponível para investir?</h2></div>
-          <div className="step-content"><div className="options-grid stagger-children">
-            {CAPITAL_OPTIONS.map(o => (<button key={o.value} className={`option-card${capital === o.value ? " selected" : ""}`} onClick={() => selectCapital(o.value)}><span className="option-indicator" /><div><div className="option-label">{o.label}</div><div className="option-sublabel">{o.sub}</div></div></button>))}
-          </div></div>
+          <div className="step-content">
+            <div className="options-grid stagger-children">
+              {CAPITAL_OPTIONS.map(o => (
+                <button key={o.value} className={`option-card${capital === o.value ? " selected" : ""}`} onClick={() => selectCapital(o.value)}>
+                  <span className="option-indicator" />
+                  <div>
+                    <div className="option-label">{o.label}</div>
+                    <div className="option-sublabel">{o.sub}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
         </section>
       )}
+
       {step === "q2" && (
         <section className="step-view step-centered animate-step" id="step-q2">
           <Logo size="sm" />
           <div className="step-header"><span className="step-number">Pergunta 2 de 3</span><h2 className="step-question">Quando precisa de ver o retorno?</h2></div>
-          <div className="step-content"><div className="options-grid stagger-children">
-            {HORIZON_OPTIONS.map(o => (<button key={o.value} className={`option-card${horizon === o.value ? " selected" : ""}`} onClick={() => selectHorizon(o.value)}><span className="option-indicator" /><div><div className="option-label">{o.label}</div><div className="option-sublabel">{o.sub}</div></div></button>))}
-          </div></div>
+          <div className="step-content">
+            <div className="options-grid stagger-children">
+              {HORIZON_OPTIONS.map(o => (
+                <button key={o.value} className={`option-card${horizon === o.value ? " selected" : ""}`} onClick={() => selectHorizon(o.value)}>
+                  <span className="option-indicator" />
+                  <div>
+                    <div className="option-label">{o.label}</div>
+                    <div className="option-sublabel">{o.sub}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
         </section>
       )}
+
       {step === "q3" && (
         <section className="step-view step-centered animate-step" id="step-q3">
           <Logo size="sm" />
-          <div className="step-header"><span className="step-number">Pergunta 3 de 3</span><h2 className="step-question">Como prefere gerir o seu investimento?</h2></div>
-          <div className="step-content"><div className="options-grid stagger-children">
-            {MINDSET_OPTIONS.map(o => (<button key={o.value} className={`option-card${mindset === o.value ? " selected" : ""}`} onClick={() => selectMindset(o.value)}><span className="option-indicator" /><div><div className="option-label">{o.label}</div><div className="option-sublabel">{o.sub}</div></div></button>))}
-          </div></div>
+          <div className="step-header"><span className="step-number">Pergunta 3 de 4</span><h2 className="step-question">Como prefere gerir o seu investimento?</h2></div>
+          <div className="step-content">
+            <div className="options-grid stagger-children">
+              {MINDSET_OPTIONS.map(o => (
+                <button key={o.value} className={`option-card${mindset === o.value ? " selected" : ""}`} onClick={() => { setMindset(o.value); setTimeout(() => go("q4"), 200); }}>
+                  <span className="option-indicator" />
+                  <div>
+                    <div className="option-label">{o.label}</div>
+                    <div className="option-sublabel">{o.sub}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {step === "q4" && (
+        <section className="step-view step-centered animate-step" id="step-q4">
+          <Logo size="sm" />
+          <div className="step-header"><span className="step-number">Pergunta 4 de 4</span><h2 className="step-question">Como normalmente aborda investimento imobiliário?</h2></div>
+          <div className="step-content">
+            <div className="options-grid stagger-children">
+              {PROFILE_OPTIONS.map(o => (
+                <button key={o.value} className={`option-card${profile === o.value ? " selected" : ""}`} onClick={async () => {
+                  setProfile(o.value);
+                  setTimeout(async () => {
+                    go("processing");
+                    try { await saveLeadAction({ capital, horizonte: horizon, preferencia: mindset }); } catch { }
+                    setTimeout(() => go("results"), 1800);
+                  }, 200);
+                }}>
+                  <span className="option-indicator" />
+                  <div>
+                    <div className="option-label">{o.label}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
         </section>
       )}
 
@@ -208,8 +328,126 @@ export default function Home() {
               </div>
             </div>
             <p className="result-note">Baseado em médias de mercado na região de Aveiro.</p>
-            <button className="btn-next" onClick={() => go("analysis")}>📊 Ver a Análise Completa do Mercado →</button>
+            <button className="btn-next" onClick={() => go("anchoring")}>⚓ Ver Análise de Realidade →</button>
             <WaLink id="wa-results" />
+          </div>
+        </section>
+      )}
+
+      {/* ═══ STEP 2.1 — ANCHORING ═══ */}
+      {step === "anchoring" && (
+        <section className="step-view step-scroll animate-step" id="step-anchoring">
+          <Logo size="md" />
+          <div className="step-inner">
+            <div className="context-image-break">
+              <img src="/aveiro-2.jpg" alt="Aveiro Context" className="context-img-full" />
+            </div>
+            <h2 className="section-title">⚓ Realidade prática do mercado</h2>
+            <div className="info-grid">
+              <div className="info-card">
+                <div className="info-icon">💰</div>
+                <p className="info-text">Retornos variam mais pela <strong>compra</strong> do que pela valorização</p>
+              </div>
+              <div className="info-card">
+                <div className="info-icon">⏱️</div>
+                <p className="info-text">Tempo impacta margens mais do que preço de venda</p>
+              </div>
+              <div className="info-card">
+                <div className="info-icon">📋</div>
+                <p className="info-text">Atrasos administrativos alteram completamente projeções</p>
+              </div>
+              <div className="info-card">
+                <div className="info-icon">🎯</div>
+                <p className="info-text">Execução pesa mais do que cenário teórico</p>
+              </div>
+            </div>
+            <button className="btn-next" onClick={() => go("rational")}>🔍 Analisar Variáveis Críticas →</button>
+            <WaLink id="wa-anchoring" />
+          </div>
+        </section>
+      )}
+
+      {/* ═══ STEP 2.2 — RATIONAL ═══ */}
+      {step === "rational" && (
+        <section className="step-view step-scroll animate-step" id="step-rational">
+          <Logo size="md" />
+          <div className="step-inner">
+            <div className="context-image-break">
+              <img src="/aveiro-3.jpg" alt="Aveiro Analysis" className="context-img-full" />
+            </div>
+
+            {/* Asymmetric staggered layout */}
+            <h2 className="section-title" style={{ textAlign: "left" }}>🔍 Variáveis que definem a viabilidade real</h2>
+            <div className="staggered-grid">
+              <div className="stagger-card stagger-left">
+                <div className="stagger-icon">💧</div>
+                <h4 className="stagger-title">Liquidez de saída</h4>
+              </div>
+              <div className="stagger-card stagger-right">
+                <div className="stagger-icon">🛡️</div>
+                <h4 className="stagger-title">Margem de contingência</h4>
+              </div>
+              <div className="stagger-card stagger-left">
+                <div className="stagger-icon">📊</div>
+                <h4 className="stagger-title">Estructura fiscal</h4>
+              </div>
+              <div className="stagger-card stagger-right">
+                <div className="stagger-icon">⏳</div>
+                <h4 className="stagger-title">Sensibilidade ao tempo</h4>
+              </div>
+              <div className="stagger-card stagger-left">
+                <div className="stagger-icon">🏗️</div>
+                <h4 className="stagger-title">Viabilidade urbanística</h4>
+              </div>
+              <div className="stagger-card stagger-right">
+                <div className="stagger-icon">⚖️</div>
+                <h4 className="stagger-title">Relação risco / capital / duração</h4>
+              </div>
+            </div>
+
+            <div className="spacer-lg" />
+
+            {/* Timeline vertical flow */}
+            <h2 className="section-title" style={{ textAlign: "right" }}>⚠️ Onde muitas operações perdem margem</h2>
+            <div className="timeline-flow">
+              <div className="timeline-item">
+                <div className="timeline-marker">💸</div>
+                <div className="timeline-content">
+                  <h4 className="timeline-title">Custos subestimados</h4>
+                  <p className="timeline-desc">Orçamentos irrealistas levam a margens negativas</p>
+                </div>
+              </div>
+              <div className="timeline-item">
+                <div className="timeline-marker">📝</div>
+                <div className="timeline-content">
+                  <h4 className="timeline-title">Atrasos de licenciamento</h4>
+                  <p className="timeline-desc">Cada mês de atraso corrói a rentabilidade</p>
+                </div>
+              </div>
+              <div className="timeline-item">
+                <div className="timeline-marker">🔨</div>
+                <div className="timeline-content">
+                  <h4 className="timeline-title">Alterações de obra</h4>
+                  <p className="timeline-desc">Imprevistos que disparam custos</p>
+                </div>
+              </div>
+              <div className="timeline-item">
+                <div className="timeline-marker">⚠️</div>
+                <div className="timeline-content">
+                  <h4 className="timeline-title">Problemas de execução</h4>
+                  <p className="timeline-desc">Falta de controlo no terreno</p>
+                </div>
+              </div>
+              <div className="timeline-item">
+                <div className="timeline-marker">📉</div>
+                <div className="timeline-content">
+                  <h4 className="timeline-title">Saída abaixo do esperado</h4>
+                  <p className="timeline-desc">Mercado muda ou avaliação foi otimista</p>
+                </div>
+              </div>
+            </div>
+            <button className="btn-next" onClick={() => go("analysis")}>📍 Porquê Aveiro Agora? →</button>
+            <WaLink id="wa-rational" />
           </div>
         </section>
       )}
@@ -220,24 +458,21 @@ export default function Home() {
           <Logo size="md" />
           <div className="step-inner">
             <h2 className="section-title">📍 Porquê Aveiro? Porquê agora?</h2>
-            <p className="body-text" style={{ marginBottom: "1rem" }}>Os investidores mais inteligentes já estão a movimentar-se. Estes são os factos:</p>
+            <p className="body-text" style={{ marginBottom: "1rem" }}>Os investidores inteligentes já estão a movimentar-se:</p>
             <ul className="checklist stagger-children">
-              <li className="checklist-item"><span className="checklist-icon">✅</span>Maior valorização imobiliária de Portugal — e a acelerar</li>
-              <li className="checklist-item"><span className="checklist-icon">✅</span>Procura internacional recorde — stock a esgotar rapidamente</li>
-              <li className="checklist-item"><span className="checklist-icon">✅</span>Tech hub + universidade = emprego e talento a crescer</li>
-              <li className="checklist-item"><span className="checklist-icon">✅</span>Oferta residencial criticamente baixa — preços vão subir mais</li>
-              <li className="checklist-item"><span className="checklist-icon">✅</span>Rentabilidade consistentemente acima da média nacional</li>
+              <li className="checklist-item"><span className="checklist-icon">✅</span>Maior valorização imobiliária — em aceleração</li>
+              <li className="checklist-item"><span className="checklist-icon">✅</span>Procura internacional recorde</li>
+              <li className="checklist-item"><span className="checklist-icon">✅</span>Tech hub + universidade a crescer</li>
+              <li className="checklist-item"><span className="checklist-icon">✅</span>Oferta residencial criticamente baixa</li>
             </ul>
             <div className="spacer-lg" />
-            <h2 className="section-title">⚠️ A maioria dos investidores <span style={{ color: "#e85d5d" }}>perde dinheiro</span></h2>
-            <p className="body-text" style={{ marginBottom: "1rem" }}>Não cometa estes erros. Saiba o que separa quem ganha de quem perde:</p>
+            <h2 className="section-title">⚠️ A maioria perde dinheiro</h2>
             <ul className="insight-list stagger-children">
-              <li className="insight-item"><span className="x-icon-lg">✕</span><span className="insight-text">Compram caro — sem análise real do valor do imóvel</span></li>
-              <li className="insight-item"><span className="x-icon-lg">✕</span><span className="insight-text">Subestimam custos — obras e imprevistos destroem a margem</span></li>
-              <li className="insight-item"><span className="x-icon-lg">✕</span><span className="insight-text">Perdem controlo — prazos derrapam, orçamentos explodem</span></li>
-              <li className="insight-item"><span className="x-icon-lg">✕</span><span className="insight-text">Vendem mal — timing errado, sem comprador, sem liquidez</span></li>
+              <li className="insight-item"><span className="x-icon-lg">✕</span><span className="insight-text">Compram caro — sem análise de valor real</span></li>
+              <li className="insight-item"><span className="x-icon-lg">✕</span><span className="insight-text">Subestimam custos de obra e imprevistos</span></li>
+              <li className="insight-item"><span className="x-icon-lg">✕</span><span className="insight-text">Perdem controlo sobre prazos e orçamentos</span></li>
             </ul>
-            <button className="btn-next" onClick={() => go("strategy")}>🎯 Ver as Recomendações Para Si →</button>
+            <button className="btn-next" onClick={() => go("strategy")}>🎯 Ver Recomendações Estratégicas →</button>
             <WaLink id="wa-analysis" />
           </div>
         </section>
@@ -248,48 +483,88 @@ export default function Home() {
         <section className="step-view step-scroll animate-step" id="step-strategy">
           <Logo size="md" />
           <div className="step-inner">
-            <h2 className="section-title">🎯 Recomendações Para Si</h2>
-            <p className="body-text" style={{ marginBottom: "1.25rem" }}>Com base no seu perfil, estas são as nossas recomendações concretas:</p>
-
+            <h2 className="section-title">🎯 Recomendações Estratégicas</h2>
             <div className="rec-card">
               <span className="rec-icon">1️⃣</span>
               <div>
-                <h3 className="rec-title">Invista apenas em ofertas fora de mercado</h3>
-                <p className="rec-text">Os melhores negócios em Aveiro nunca chegam aos portais. São negociados em privado, antes de entrar no mercado público. Só assim consegue comprar abaixo do valor real.</p>
+                <h3 className="rec-title">Invista em ofertas fora de mercado</h3>
+                <p className="rec-text">Os melhores negócios em Aveiro são negociados em privado, antes de entrar no mercado público.</p>
               </div>
             </div>
             <div className="rec-card">
               <span className="rec-icon">2️⃣</span>
               <div>
-                <h3 className="rec-title">Aposte em reconversão de imóveis com ciclos rápidos</h3>
-                <p className="rec-text">Comprar, reabilitar e vender em ciclos curtos é a estratégia com melhor relação retorno/risco em Aveiro. Evite projetos longos sem equipa estruturada.</p>
+                <h3 className="rec-title">Foco em reconversão com ciclos rápidos</h3>
+                <p className="rec-text">Ciclos curtos oferecem melhor relação retorno/risco. Evite projetos longos sem equipa local.</p>
               </div>
             </div>
             <div className="rec-card">
               <span className="rec-icon">3️⃣</span>
               <div>
-                <h3 className="rec-title">Trabalhe com quem conhece o mercado local</h3>
-                <p className="rec-text">Sem rede no terreno, perde oportunidades e comete erros caros. Ter uma equipa com operações ativas em Aveiro é a diferença entre lucrar e perder.</p>
+                <h3 className="rec-title">Proteja o capital antes do retorno</h3>
+                <p className="rec-text">Cada operação deve ter margem de segurança. O capital tem de estar protegido primeiro.</p>
               </div>
             </div>
-            <div className="rec-card">
-              <span className="rec-icon">4️⃣</span>
-              <div>
-                <h3 className="rec-title">Proteja o seu capital antes de pensar em retorno</h3>
-                <p className="rec-text">Cada operação deve ser estruturada com margem de segurança. O capital tem de estar protegido primeiro — o retorno vem a seguir, de forma natural.</p>
+
+            <button className="btn-next" onClick={() => go("presentation")}>🏗️ Ver Abordagem no Terreno →</button>
+            <WaLink id="wa-strategy" />
+          </div>
+        </section>
+      )}
+
+      {/* ═══ STEP 4.1 — PRESENTATION ═══ */}
+      {step === "presentation" && (
+        <section className="step-view step-scroll animate-step" id="step-presentation">
+          <Logo size="md" />
+          <div className="step-inner">
+            <div className="context-image-break">
+              <img src="/aveiro-4.png" alt="Aveiro Territory" className="context-img-full" />
+            </div>
+
+            <h2 className="section-title">🎯 Abordagem operacional em Aveiro</h2>
+            <div className="badge-grid">
+              <div className="approach-badge">
+                <span className="badge-icon">🔎</span>
+                <span className="badge-text">Seleção criteriosa</span>
+              </div>
+              <div className="approach-badge">
+                <span className="badge-icon">🏛️</span>
+                <span className="badge-text">Estruturação conservadora</span>
+              </div>
+              <div className="approach-badge">
+                <span className="badge-icon">🛡️</span>
+                <span className="badge-text">Margens de segurança</span>
+              </div>
+              <div className="approach-badge">
+                <span className="badge-icon">🗺️</span>
+                <span className="badge-text">Planeamento de saída</span>
+              </div>
+              <div className="approach-badge">
+                <span className="badge-icon">✅</span>
+                <span className="badge-text">Controlo de execução</span>
               </div>
             </div>
 
             <div className="spacer-lg" />
-            <div className="solution-block">
-              <Logo size="sm" />
-              <h3 className="section-title">É exatamente isto que fazemos</h3>
-              <p className="body-text-lg">A Silvermont Capital opera exclusivamente com <strong>ofertas fora de mercado em Aveiro</strong>. A nossa metodologia: reconversão inteligente, ciclos rápidos, retornos acima da média, risco controlado.</p>
-              <p className="body-text-lg" style={{ marginTop: "0.6rem", color: "var(--gold-light)" }}>Cada recomendação acima é o que praticamos diariamente. Trabalhamos apenas com investidores qualificados.</p>
+
+            <div className="user-photo-card">
+              <div className="photo-with-logo">
+                <img src="/user-photo.jpg" alt="Estrategista" className="user-photo-img" />
+                <img src="/logo-horizontal.png" alt="Silvermont Capital" className="photo-logo-large" />
+              </div>
+              <div className="user-photo-info">
+                <span className="user-photo-name">Estrategista de Operações</span>
+                <span className="user-photo-tag">Silvermont Capital</span>
+              </div>
             </div>
 
-            <button className="btn-next" onClick={() => go("final")}>🔑 Ver Oportunidades Exclusivas →</button>
-            <WaLink id="wa-strategy" />
+            <div className="solution-block">
+              <h3 className="section-title">Metodologia Silvermont</h3>
+              <p className="body-text-lg">Operamos exclusivamente com <strong>ofertas fora de mercado</strong>. Reconversão inteligente, ciclos rápidos e risco controlado.</p>
+            </div>
+
+            <button className="btn-next" onClick={() => go("final")}>🔑 Aceder às Oportunidades Exclusivas →</button>
+            <WaLink id="wa-presentation" />
           </div>
         </section>
       )}
@@ -300,19 +575,20 @@ export default function Home() {
           <Logo size="lg" onClick={restart} />
           <div className="step-inner" style={{ textAlign: "center", maxWidth: "520px" }}>
             <h2 className="section-title" style={{ textAlign: "center" }}>
-              Oportunidades Exclusivas <span className="gold-highlight">Fora de Mercado</span> em Aveiro
+              Oportunidades <span className="gold-highlight">Fora de Mercado</span>
             </h2>
             <p className="body-text-lg" style={{ textAlign: "center", marginBottom: "0.5rem" }}>
-              Imóveis que nunca chegam aos portais. Operações validadas. Retornos acima da média.
+              Imóveis que nunca chegam aos portais. Operações validadas.
             </p>
-            <p className="urgency-text">⚡ Vagas limitadas por trimestre — apenas investidores qualificados</p>
-            <div style={{ marginTop: "1.25rem" }}>
+            <p className="urgency-text">⚡ Apenas investidores qualificados</p>
+
+            <div style={{ marginTop: "2.5rem" }}>
+              <div className="cta-context-text">Comunicação direta. Sem envios massificados.</div>
               <a href={WA_URL} target="_blank" rel="noopener noreferrer" className="btn-final-wa" id="wa-final">
                 <WaIcon s={22} />
-                <span>Receber Oportunidades Fora de Mercado</span>
+                <span>Receber Oportunidades Selecionadas</span>
               </a>
             </div>
-            <p className="micro-text" style={{ marginTop: "1rem" }}>Resposta em menos de 2h · Sem compromisso · Gratuito</p>
             <button className="btn-save" onClick={() => { if (navigator.clipboard) navigator.clipboard.writeText(window.location.href); setCopied(true); setTimeout(() => setCopied(false), 2500); }}>
               {copied ? "✓ Link copiado!" : "📎 Guardar link para consultar depois"}
             </button>
