@@ -433,7 +433,7 @@ export default function Home() {
         <section className="step-view step-scroll animate-step" id="step-analysis">
           <Logo size="md" />
           <div className="step-inner">
-            <h2 className="section-title">Porquê Aveiro? Porquê agora?</h2>
+            <h2 className="section-title">📍 Porquê Aveiro? Porquê agora?</h2>
             <p className="body-text" style={{ marginBottom: "1rem" }}>Investidores inteligentes já se movimentaram:</p>
             <ul className="checklist stagger-children">
               <li className="checklist-item"><span className="checklist-icon">✅</span>Maior valorização imobiliária — em aceleração</li>
@@ -442,7 +442,7 @@ export default function Home() {
               <li className="checklist-item"><span className="checklist-icon">✅</span>Oferta residencial criticamente baixa</li>
             </ul>
             <div className="spacer-lg" />
-            <h2 className="section-title">A maioria perde dinheiro</h2>
+            <h2 className="section-title">⚠️ A maioria perde dinheiro</h2>
             <ul className="insight-list stagger-children">
               <li className="insight-item"><span className="x-icon-lg">✕</span><span className="insight-text">Compram caro — sem análise de valor real</span></li>
               <li className="insight-item"><span className="x-icon-lg">✕</span><span className="insight-text">Subestimam custos de obra e imprevistos</span></li>
