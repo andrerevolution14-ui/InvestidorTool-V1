@@ -1258,6 +1258,64 @@ h3 {
   margin-top: 0.5rem;
 }
 
+.photo-logo-xl {
+  width: 250px;
+  height: auto;
+  opacity: 1;
+  filter: brightness(1);
+  margin-top: 0.5rem;
+}
+
+/* Approach detailed layout */
+.approach-detailed {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.approach-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  transition: all 0.3s var(--ease-out);
+}
+
+.approach-item:hover {
+  border-color: var(--gold);
+  background: var(--bg-card-hover);
+  transform: translateX(4px);
+}
+
+.approach-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.approach-icon {
+  font-size: 2rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.approach-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.approach-desc {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+  padding-left: 3rem;
+}
+
 /* Staggered asymmetric grid */
 .staggered-grid {
   display: flex;
@@ -1306,6 +1364,13 @@ h3 {
   font-size: 1.1rem;
   font-weight: 700;
   color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.stagger-desc {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
   margin: 0;
 }
 
@@ -1442,6 +1507,14 @@ h3 {
 
   .photo-logo-large {
     width: 160px;
+  }
+
+  .photo-logo-xl {
+    width: 180px;
+  }
+
+  .approach-desc {
+    padding-left: 0;
   }
 
   .stagger-card {
