@@ -171,6 +171,9 @@ export default function Home() {
           </div>
           <button className="btn-primary" onClick={() => go("q1")} id="cta-start">Iniciar a Minha Simulação Gratuita →</button>
           <p className="micro-text" style={{ marginTop: "0.75rem" }}>Sem compromisso · Resultado imediato</p>
+          <div style={{ marginTop: "1.5rem", fontSize: "0.75rem", color: "#666", opacity: 0.8, textAlign: "center" }}>
+            andre@verdmont.eu
+          </div>
         </section>
       )}
 
