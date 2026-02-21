@@ -42,6 +42,7 @@
 html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior: none;
 }
 
 body {
@@ -50,6 +51,7 @@ body {
   color: var(--text-primary);
   line-height: 1.65;
   overflow-x: hidden;
+  overscroll-behavior: none;
 }
 
 body::before {
