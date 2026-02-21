@@ -173,18 +173,36 @@ h3 {
 }
 
 .animate-step {
-  animation: step-enter 350ms var(--ease-out) both;
+  animation: step-enter 420ms var(--ease-out) both;
+  will-change: transform, opacity;
+}
+
+.step-exit.animate-step {
+  animation: step-exit 240ms var(--ease-smooth) both;
+  pointer-events: none;
 }
 
 @keyframes step-enter {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(20px) scale(0.99);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes step-exit {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-16px) scale(0.99);
   }
 }
 
@@ -303,6 +321,12 @@ h3 {
   box-shadow: 0 8px 32px rgba(212, 168, 67, 0.35);
 }
 
+.btn-primary:active {
+  transform: scale(0.97) translateY(0);
+  box-shadow: none;
+  transition: transform 80ms ease, box-shadow 80ms ease;
+}
+
 /* Continue / Next – gold bg, colorful, compact */
 .btn-next {
   display: block;
@@ -325,6 +349,11 @@ h3 {
 .btn-next:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 24px rgba(212, 168, 67, 0.3);
+}
+
+.btn-next:active {
+  transform: scale(0.97) translateY(0);
+  transition: transform 80ms ease;
 }
 
 /* WA pill – clearly clickable, visible button */
@@ -376,6 +405,11 @@ h3 {
 .btn-final-wa:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 32px rgba(37, 211, 102, 0.4);
+}
+
+.btn-final-wa:active {
+  transform: scale(0.97) translateY(0);
+  transition: transform 80ms ease;
 }
 
 @keyframes pulse-glow {
@@ -496,6 +530,26 @@ h3 {
   background: var(--bg-card-active);
   border-color: var(--border-gold-active);
   box-shadow: 0 0 20px rgba(212, 168, 67, 0.1);
+  animation: card-select 350ms var(--ease-out) both;
+}
+
+@keyframes card-select {
+  0% {
+    box-shadow: 0 0 0 rgba(212, 168, 67, 0);
+  }
+
+  45% {
+    box-shadow: 0 0 28px rgba(212, 168, 67, 0.28);
+  }
+
+  100% {
+    box-shadow: 0 0 20px rgba(212, 168, 67, 0.1);
+  }
+}
+
+.option-card:active {
+  transform: translateX(2px) scale(0.97);
+  transition: transform 80ms ease;
 }
 
 .option-card.selected::before {

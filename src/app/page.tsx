@@ -99,6 +99,7 @@ export default function Home() {
   const [ready, setReady] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showScrollHint, setShowScrollHint] = useState(false);
+  const [exiting, setExiting] = useState(false);
 
   useEffect(() => {
     // Always start at hero for new visits
@@ -115,8 +116,14 @@ export default function Home() {
   }, [step, capital, horizon, mindset, profile, ready]);
 
   const go = useCallback((s: Step) => {
-    setStep(s);
-    window.scrollTo(0, 0);
+    setShowScrollHint(false);
+    setExiting(true);
+    setTimeout(() => {
+      setStep(s);
+      setExiting(false);
+      window.scrollTo(0, 0);
+    }, 260);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const restart = useCallback(() => {
@@ -170,6 +177,9 @@ export default function Home() {
 
   if (!ready) return null;
 
+  const centerCls = `step-view step-centered animate-step${exiting ? " step-exit" : ""}`;
+  const scrollCls = `step-view step-scroll animate-step${exiting ? " step-exit" : ""}`;
+
   return (
     <main className="funnel">
       {step !== "hero" && step !== "processing" && <ProgressBar progress={getProgress(step)} stepInfo={userStepInfo} />}
@@ -186,7 +196,7 @@ export default function Home() {
 
       {/* ═══ HERO ═══ */}
       {step === "hero" && (
-        <section className="step-view step-centered animate-step" id="hero">
+        <section className={centerCls} id="hero">
           <h1 className="headline-hero">Aveiro está a explodir.<br /><span className="gold-highlight">O seu dinheiro devia estar lá.</span></h1>
           <p className="subheadline">+12% valorização anual. Procura recorde. Stock limitado. Descubra em 30 segundos se faz sentido para si.</p>
 
@@ -206,7 +216,7 @@ export default function Home() {
 
       {/* ═══ QUIZ Q1-Q4 ═══ */}
       {step === "q1" && (
-        <section className="step-view step-centered animate-step" id="step-q1">
+        <section className={centerCls} id="step-q1">
           <Logo size="sm" />
           <div className="step-header"><span className="step-number">Pergunta 1 de 3</span><h2 className="step-question">Quanto capital tem disponível para investir?</h2></div>
           <div className="step-content">
@@ -226,7 +236,7 @@ export default function Home() {
       )}
 
       {step === "q2" && (
-        <section className="step-view step-centered animate-step" id="step-q2">
+        <section className={centerCls} id="step-q2">
           <Logo size="sm" />
           <div className="step-header"><span className="step-number">Pergunta 2 de 3</span><h2 className="step-question">Quando precisa de ver o retorno?</h2></div>
           <div className="step-content">
@@ -246,7 +256,7 @@ export default function Home() {
       )}
 
       {step === "q3" && (
-        <section className="step-view step-centered animate-step" id="step-q3">
+        <section className={centerCls} id="step-q3">
           <Logo size="sm" />
           <div className="step-header"><span className="step-number">Pergunta 3 de 3</span><h2 className="step-question">Como prefere gerir o seu investimento?</h2></div>
           <div className="step-content">
@@ -267,7 +277,7 @@ export default function Home() {
 
       {/* ═══ PROCESSING ═══ */}
       {step === "processing" && (
-        <section className="step-view step-centered animate-step" id="step-processing">
+        <section className={centerCls} id="step-processing">
           <Logo size="sm" />
           <div className="processing-bars">{[1, 2, 3, 4, 5].map(i => <div key={i} className="processing-bar" />)}</div>
           <p className="processing-text">A analisar o seu perfil de investidor...</p>
@@ -276,7 +286,7 @@ export default function Home() {
 
       {/* ═══ STEP 2 — RESULTS ═══ */}
       {step === "results" && (
-        <section className="step-view step-scroll animate-step" id="step-results">
+        <section className={scrollCls} id="step-results">
           <Logo size="md" />
           <div className="step-inner">
             <div className="verdict-card verdict-green">
@@ -321,7 +331,7 @@ export default function Home() {
 
       {/* ═══ STEP 2.1 — ANCHORING ═══ */}
       {step === "anchoring" && (
-        <section className="step-view step-scroll animate-step" id="step-anchoring">
+        <section className={scrollCls} id="step-anchoring">
           <Logo size="md" />
           <div className="step-inner">
             <h2 className="section-title">Realidade prática do mercado</h2>
@@ -356,7 +366,7 @@ export default function Home() {
 
       {/* ═══ STEP 2.2 — RATIONAL ═══ */}
       {step === "rational" && (
-        <section className="step-view step-scroll animate-step" id="step-rational">
+        <section className={scrollCls} id="step-rational">
           <Logo size="md" />
           <div className="step-inner">
 
@@ -460,7 +470,7 @@ export default function Home() {
 
       {/* ═══ STEP 3 — ANALYSIS ═══ */}
       {step === "analysis" && (
-        <section className="step-view step-scroll animate-step" id="step-analysis">
+        <section className={scrollCls} id="step-analysis">
           <Logo size="md" />
           <div className="step-inner">
             <h2 className="section-title">📍 Porquê Aveiro? Porquê agora?</h2>
@@ -486,7 +496,7 @@ export default function Home() {
 
       {/* ═══ STEP 4 — RECOMMENDATIONS ═══ */}
       {step === "strategy" && (
-        <section className="step-view step-scroll animate-step" id="step-strategy">
+        <section className={scrollCls} id="step-strategy">
           <Logo size="md" />
           <div className="step-inner">
             <h2 className="section-title">Recomendações Estratégicas</h2>
@@ -520,7 +530,7 @@ export default function Home() {
 
       {/* ═══ STEP 4.1 — PRESENTATION ═══ */}
       {step === "presentation" && (
-        <section className="step-view step-scroll animate-step" id="step-presentation">
+        <section className={scrollCls} id="step-presentation">
           <Logo size="md" />
           <div className="step-inner">
 
@@ -595,7 +605,7 @@ export default function Home() {
 
       {/* ═══ STEP 5 — FINAL ═══ */}
       {step === "final" && (
-        <section className="step-view step-centered animate-step" id="step-final">
+        <section className={centerCls} id="step-final">
           <Logo size="lg" onClick={restart} />
           <div className="step-inner" style={{ textAlign: "center", maxWidth: "520px" }}>
             <h2 className="section-title" style={{ textAlign: "center" }}>
