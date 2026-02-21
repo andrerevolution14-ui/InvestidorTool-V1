@@ -88,6 +88,8 @@ function WaLink({ id }: { id: string }) {
   return <div style={{ textAlign: "center", marginTop: "0.75rem" }}><a href={WA_URL} target="_blank" rel="noopener noreferrer" className="wa-pill" id={id}><WaIcon s={15} /><span>Receber oportunidades fora de mercado</span></a></div>;
 }
 
+const SCROLL_STEPS: Step[] = ["results", "anchoring", "rational", "analysis", "strategy", "presentation"];
+
 export default function Home() {
   const [step, setStep] = useState<Step>("hero");
   const [capital, setCapital] = useState("");
@@ -96,6 +98,7 @@ export default function Home() {
   const [profile, setProfile] = useState("");
   const [ready, setReady] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showScrollHint, setShowScrollHint] = useState(false);
 
   useEffect(() => {
     // Always start at hero for new visits
@@ -113,7 +116,7 @@ export default function Home() {
 
   const go = useCallback((s: Step) => {
     setStep(s);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo(0, 0);
   }, []);
 
   const restart = useCallback(() => {
@@ -148,11 +151,38 @@ export default function Home() {
   const capLabel = CAPITAL_OPTIONS.find(o => o.value === capital)?.label || "";
   const userStepInfo = getUserStep(step);
 
+  // Show scroll hint on long pages, hide when user scrolls
+  useEffect(() => {
+    if (SCROLL_STEPS.includes(step)) {
+      setShowScrollHint(true);
+      const hide = () => {
+        if (window.scrollY > 80) {
+          setShowScrollHint(false);
+          window.removeEventListener("scroll", hide);
+        }
+      };
+      window.addEventListener("scroll", hide, { passive: true });
+      return () => window.removeEventListener("scroll", hide);
+    } else {
+      setShowScrollHint(false);
+    }
+  }, [step]);
+
   if (!ready) return null;
 
   return (
     <main className="funnel">
       {step !== "hero" && step !== "processing" && <ProgressBar progress={getProgress(step)} stepInfo={userStepInfo} />}
+
+      {/* ── Scroll Hint ── */}
+      {showScrollHint && (
+        <div className="scroll-hint" aria-hidden="true">
+          <div className="scroll-hint-ring">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
+          </div>
+          <span className="scroll-hint-label">scroll</span>
+        </div>
+      )}
 
       {/* ═══ HERO ═══ */}
       {step === "hero" && (
