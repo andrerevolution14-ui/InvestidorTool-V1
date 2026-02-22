@@ -4,20 +4,23 @@ import { createSimulationLead, updateSimulationLead } from "@/lib/supabase";
 
 /**
  * Called on page load.
- * Receives contact data from Meta Instant Form passed as URL query params.
- * Creates the Supabase row and returns the row id so the client
- * can update it with each subsequent quiz answer.
+ * Captures ALL Meta Instant Form data (name, email, phone) + tracking params
+ * from the URL and inserts a single Supabase row.
  *
- * Configure the Meta form "Thank You URL" as:
- * https://yoursite.com?first_name={{first_name}}&email={{email}}&phone_number={{phone_number}}
+ * Configure the Meta Instant Form "Thank You URL" as:
+ * https://yoursite.com?first_name={{first_name}}&email={{email}}&phone_number={{phone_number}}&lead_id={{lead_id}}
  */
 export async function initLeadAction(params: {
     name?: string;
     email?: string;
     phone?: string;
+    fb_lead_id?: string;
+    fbclid?: string;
+    utm_source?: string;
+    utm_campaign?: string;
 }) {
     try {
-        // Strip non-numeric chars from phone so it fits the numeric column
+        // Strip non-numeric chars so phone fits the `numeric` column
         const phoneNum = params.phone
             ? Number(params.phone.replace(/\D/g, "")) || null
             : null;
@@ -26,7 +29,11 @@ export async function initLeadAction(params: {
             Name: params.name || null,
             Email: params.email || null,
             Phone: phoneNum,
-            status: false,
+            fb_lead_id: params.fb_lead_id || null,
+            fbclid: params.fbclid || null,
+            utm_source: params.utm_source || null,
+            utm_campaign: params.utm_campaign || null,
+            status: false,              // DO NOT change — bool column
         });
 
         return { success: true, id };
@@ -38,15 +45,15 @@ export async function initLeadAction(params: {
 
 /**
  * Called after each quiz answer to update the existing row.
- * Maps our internal field names to the Supabase column names.
+ * Maps internal field names → exact Supabase column names.
  */
 export async function updateLeadAction(
     id: number,
     data: {
-        capital?: string;    // → Capital
-        horizonte?: string;  // → Retorno
-        preferencia?: string; // → Gestão
-        completed?: boolean; // → status
+        capital?: string;      // → Capital
+        horizonte?: string;    // → Retorno
+        preferencia?: string;  // → Gestão
+        completed?: boolean;   // → status (bool — DO NOT change type)
     }
 ) {
     if (!id) return { success: false };

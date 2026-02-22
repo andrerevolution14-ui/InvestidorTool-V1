@@ -5,21 +5,41 @@ const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Matches exactly the table schema in Supabase (table id: 17452)
+// Exactly matches the Supabase table "simulation_leads" (id: 17452)
+// Run the following SQL in Supabase to add the tracking columns:
+//
+// ALTER TABLE simulation_leads
+//   ADD COLUMN IF NOT EXISTS fb_lead_id   text,
+//   ADD COLUMN IF NOT EXISTS fbclid        text,
+//   ADD COLUMN IF NOT EXISTS utm_source    text,
+//   ADD COLUMN IF NOT EXISTS utm_campaign  text,
+//   ADD COLUMN IF NOT EXISTS updated_at    timestamptz;
+
 export interface SimulationLead {
-    // Contact data from Meta Instant Form (passed via URL params)
-    Name?: string | null;    // text — first_name from Meta form
-    Phone?: number | null;   // numeric — phone_number from Meta form
-    Email?: string | null;   // text — email from Meta form
+    // Contact data — passed by Meta Instant Form via URL params
+    Name?: string | null;   // text
+    Phone?: number | null;   // numeric
+    Email?: string | null;   // text
+
+    // Meta tracking — passed via URL params
+    fb_lead_id?: string | null;  // text (new column)
+    fbclid?: string | null;  // text (new column)
+    utm_source?: string | null;  // text (new column)
+    utm_campaign?: string | null; // text (new column)
+
     // Quiz answers
-    Capital?: string | null; // text — Q1: capital disponível
+    Capital?: string | null; // text
     Retorno?: string | null; // text — Q2: horizonte de retorno
-    Gestão?: string | null;  // text — Q3: preferência de gestão
-    // Funnel state
-    status?: boolean;        // bool (default false) — true when quiz completed
+    Gestão?: string | null; // text — Q3: preferência de gestão
+
+    // Status (DO NOT change — bool column, default false)
+    status?: boolean;
+
+    // Timestamps
+    updated_at?: string;
 }
 
-/** Insert a new lead row. Returns the generated id. */
+/** Insert a new lead row. Returns the generated int8 id. */
 export async function createSimulationLead(data: SimulationLead): Promise<number> {
     const { data: row, error } = await supabase
         .from("simulation_leads")
@@ -35,7 +55,7 @@ export async function createSimulationLead(data: SimulationLead): Promise<number
 export async function updateSimulationLead(id: number, data: Partial<SimulationLead>): Promise<void> {
     const { error } = await supabase
         .from("simulation_leads")
-        .update(data)
+        .update({ ...data, updated_at: new Date().toISOString() })
         .eq("id", id);
 
     if (error) throw error;
