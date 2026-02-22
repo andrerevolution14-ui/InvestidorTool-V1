@@ -113,13 +113,13 @@ function Logo({ size = "md", onClick }: { size?: "lg" | "md" | "sm"; onClick?: (
 }
 
 /* WA pill link – visible but not green, used in steps 2-4 */
-function WaLink({ id }: { id: string }) {
+function WaLink({ id, text }: { id: string; text?: string }) {
   const handleClick = () => trackPixel("Contact", { content_name: "whatsapp_pill" });
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }} style={{ textAlign: "center", marginTop: "1rem" }}>
       <a href={WA_URL} target="_blank" rel="noopener noreferrer" className="wa-pill" id={id} onClick={handleClick}>
         <MessageCircle size={16} />
-        <span>Receber oportunidades em Aveiro</span>
+        <span>{text || "Receber oportunidades em Aveiro"}</span>
       </a>
     </motion.div>
   );
@@ -448,11 +448,11 @@ export default function Home() {
               <div className="spacer" />
 
               <motion.div variants={STAGGER_CONTAINER} initial="hidden" animate="show">
-                <span className="label-text">📊 A Sua Simulação de Retorno</span>
+                <span className="label-text">📊 A SUA SIMULAÇÃO DE RETORNO</span>
                 <div className="result-range-group">
                   <motion.div variants={STAGGER_ITEM} className="result-range">
                     <div className="result-range-header">
-                      <span className="result-range-label">📈 Cenário Realista</span>
+                      <span className="result-range-label">📈 CENÁRIO REALISTA</span>
                       <span className="result-range-value">{returns.realistic.minP}% – {returns.realistic.maxP}%</span>
                     </div>
                     <div className="result-bar-track">
@@ -468,7 +468,7 @@ export default function Home() {
 
                   <motion.div variants={STAGGER_ITEM} className="result-range">
                     <div className="result-range-header">
-                      <span className="result-range-label">🚀 Cenário Otimizado</span>
+                      <span className="result-range-label">🚀 CENÁRIO OTIMIZADO</span>
                       <span className="result-range-value">{returns.optimized.minP}% – {returns.optimized.maxP}%</span>
                     </div>
                     <div className="result-bar-track">
@@ -506,7 +506,7 @@ export default function Home() {
               >
                 Ver Análise de Realidade <ArrowRight size={18} />
               </motion.button>
-              <WaLink id="wa-results" />
+              <WaLink id="wa-results" text="Receber lista de imóveis fora de mercado" />
             </div>
           </motion.section>
         )}
@@ -634,9 +634,11 @@ export default function Home() {
               <h2 className="section-title">⚠️ A maioria perde dinheiro</h2>
               <motion.ul variants={STAGGER_CONTAINER} initial="hidden" animate="show" className="insight-list">
                 {[
-                  "Compram caro — sem análise de valor real",
-                  "Subestimam custos de obra e imprevistos",
-                  "Perdem controlo sobre prazos e orçamentos"
+                  "Compram caro — sem análise de valor real nem da zona",
+                  "Subestimam custos — obras, taxas e imprevistos comem o lucro",
+                  "Ignoram burocracia — licenças atrasam meses e custam milhares",
+                  "Perdem controlo da obra — prazos derrapam, orçamentos explodem",
+                  "Vendem mal — timing errado, sem comprador, sem liquidez"
                 ].map((item, i) => (
                   <motion.li variants={STAGGER_ITEM} key={i} className="insight-item">
                     <span className="x-icon-lg"><X size={18} className="text-red-500" /></span>
@@ -664,21 +666,49 @@ export default function Home() {
             <div className="step-inner">
               <h2 className="section-title">Recomendações Estratégicas</h2>
               <motion.div variants={STAGGER_CONTAINER} initial="hidden" animate="show">
-                {[
-                  { icon: "1", title: "Invista em ofertas fora de mercado", text: "Os melhores negócios em Aveiro são negociados em privado, antes de entrar no mercado público." },
-                  { icon: "2", title: "Foco em reconversão rápida", text: "Ciclos curtos = melhor relação retorno/risco. Evite projetos longos sem equipa local." },
-                  { icon: "3", title: "Capital protegido primeiro", text: "Margem de segurança em cada operação. Capital protegido > retorno especulativo." }
-                ].map((item, i) => (
-                  <motion.div variants={STAGGER_ITEM} key={i} className="rec-card">
-                    <span className="rec-icon">{item.icon}</span>
-                    <div>
-                      <h3 className="rec-title">{item.title}</h3>
-                      <p className="rec-text">{item.text}</p>
-                    </div>
-                  </motion.div>
-                ))}
+                {(CAPITAL_OPTIONS.find(o => o.value === capital)?.avg || 200000) < 300000 ? (
+                  <>
+                    <motion.div variants={STAGGER_ITEM} className="rec-card">
+                      <span className="rec-icon">🏠</span>
+                      <div>
+                        <h3 className="rec-title">Conversões compactas</h3>
+                        <p className="rec-text">Transformar espaços em unidades rentáveis para maximizar o rendimento por m².</p>
+                      </div>
+                    </motion.div>
+                    <motion.div variants={STAGGER_ITEM} className="rec-card">
+                      <span className="rec-icon">📊</span>
+                      <div>
+                        <h3 className="rec-title">Reposicionamento estratégico</h3>
+                        <p className="rec-text">Comprar barato, aplicar reabilitação focada e valorizar com disciplina.</p>
+                      </div>
+                    </motion.div>
+                  </>
+                ) : (
+                  <>
+                    <motion.div variants={STAGGER_ITEM} className="rec-card">
+                      <span className="rec-icon">🏗️</span>
+                      <div>
+                        <h3 className="rec-title">Operações multiunidade</h3>
+                        <p className="rec-text">Escala para maximizar retorno. Prédios residenciais com foco em venda direta.</p>
+                      </div>
+                    </motion.div>
+                    <motion.div variants={STAGGER_ITEM} className="rec-card">
+                      <span className="rec-icon">📍</span>
+                      <div>
+                        <h3 className="rec-title">Aquisições em zonas premium</h3>
+                        <p className="rec-text">Foco em localizações de Aveiro com maior potencial de valorização a 24 meses.</p>
+                      </div>
+                    </motion.div>
+                  </>
+                )}
+                <motion.div variants={STAGGER_ITEM} className="rec-card">
+                  <span className="rec-icon">🛡️</span>
+                  <div>
+                    <h3 className="rec-title">Capital protegido primeiro</h3>
+                    <p className="rec-text">Margem de segurança em cada operação. Capital protegido &gt; retorno especulativo.</p>
+                  </div>
+                </motion.div>
               </motion.div>
-
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
