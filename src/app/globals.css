@@ -26,9 +26,11 @@
   --content-max: 620px;
   --ease-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
   --radius-sm: 10px;
   --radius-md: 14px;
   --radius-lg: 18px;
+  --shadow-gold: 0 10px 30px -10px rgba(212, 168, 67, 0.4);
 }
 
 *,
@@ -43,10 +45,11 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overscroll-behavior: none;
+  scroll-behavior: smooth;
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--font-inter), 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   background: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.65;
@@ -409,6 +412,39 @@ h3 {
   box-shadow: 0 6px 32px rgba(37, 211, 102, 0.4);
 }
 
+.btn-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-shimmer::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(to bottom right,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0) 40%,
+      rgba(255, 255, 255, 0.3) 50%,
+      rgba(255, 255, 255, 0) 60%,
+      rgba(255, 255, 255, 0) 100%);
+  transform: rotate(45deg);
+  animation: shimmer 3s infinite;
+  pointer-events: none;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translate(-100%, -100%) rotate(45deg);
+  }
+
+  100% {
+    transform: translate(100%, 100%) rotate(45deg);
+  }
+}
+
 .btn-final-wa:active {
   transform: scale(0.97) translateY(0);
   transition: transform 80ms ease;
@@ -531,8 +567,8 @@ h3 {
 .option-card.selected {
   background: var(--bg-card-active);
   border-color: var(--border-gold-active);
-  box-shadow: 0 0 20px rgba(212, 168, 67, 0.1);
-  animation: card-select 350ms var(--ease-out) both;
+  box-shadow: 0 0 30px rgba(212, 168, 67, 0.15);
+  transform: scale(1.02);
 }
 
 @keyframes card-select {
