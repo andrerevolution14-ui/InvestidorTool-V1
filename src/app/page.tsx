@@ -159,6 +159,12 @@ export default function Home() {
       utm_campaign: params.get("utm_campaign") || undefined,
     };
 
+    // Ensure state is clean on mount
+    setCapital("");
+    setHorizon("");
+    setMindset("");
+    setStep("hero");
+
     // 2. Start 10-minute timer — inserts partial lead if Q3 is never completed.
     timerRef.current = setTimeout(() => {
       timerFiredRef.current = true;
@@ -268,7 +274,11 @@ export default function Home() {
 
   return (
     <main className="funnel">
-      {step !== "hero" && step !== "processing" && <ProgressBar progress={getProgress(step)} stepInfo={userStepInfo} />}
+      <AnimatePresence mode="wait">
+        {step !== "hero" && step !== "processing" && (
+          <ProgressBar key="progress" progress={getProgress(step)} stepInfo={userStepInfo} />
+        )}
+      </AnimatePresence>
 
       <AnimatePresence mode="wait">
         {step === "hero" && (
@@ -294,7 +304,7 @@ export default function Home() {
                 <span className="hv-icon"><Shield size={20} className="gold-highlight" /></span>
                 <span>Guia: Deve ou não investir em Aveiro</span>
               </motion.div>
-              <motion.div variants={STAGGER_ITEM} initial="hidden" animate="show" transition={{ delay: 0.2 }} className="hero-value-item">
+              <motion.div variants={STAGGER_ITEM} className="hero-value-item">
                 <span className="hv-icon"><ExternalLink size={20} className="gold-highlight" /></span>
                 <span>Acesso a oportunidades fora de mercado</span>
               </motion.div>
@@ -430,7 +440,8 @@ export default function Home() {
                 <div className="verdict-icon"><Check className="text-green-500" /></div>
                 <div>
                   <h2 className="verdict-title">Sim. Deve investir em Aveiro.</h2>
-                  <p className="verdict-text">Com <strong>{capLabel}</strong>, está posicionado para capitalizar o boom. Aveiro vive procura sem precedentes.</p>
+                  <p className="verdict-text">Com <strong>{capLabel}</strong>, está posicionado para capitalizar o boom. Aveiro vive procura sem precedentes — investidores, nómadas digitais, famílias. Todos disputam stock cada vez mais escasso.</p>
+                  <p className="verdict-text" style={{ marginTop: "0.6rem" }}>Oferta qualificada? <strong>Criticamente baixa.</strong> Os melhores negócios nunca chegam aos portais. São fechados antes. <strong>Quem entra agora, entra cedo. Quem espera, paga o dobro.</strong></p>
                 </div>
               </motion.div>
 
@@ -472,6 +483,18 @@ export default function Home() {
                   </motion.div>
                 </div>
               </motion.div>
+
+              <div className="verdict-card verdict-red" style={{ marginTop: "1.5rem" }}>
+                <div className="verdict-icon"><X className="text-red-500" /></div>
+                <div>
+                  <h3 className="verdict-title-sm">Não invista se...</h3>
+                  <ul className="verdict-list">
+                    <li><span className="x-icon"><X size={14} /></span>Não tem capital realmente disponível</li>
+                    <li><span className="x-icon"><X size={14} /></span>Espera lucros sem estrutura profissional</li>
+                    <li><span className="x-icon"><X size={14} /></span>Não quer trabalhar com operadores no terreno</li>
+                  </ul>
+                </div>
+              </div>
 
               <motion.p variants={STAGGER_ITEM} initial="hidden" animate="show" transition={{ delay: 1 }} className="result-note">Baseado em médias de mercado na região de Aveiro.</motion.p>
 
@@ -596,14 +619,14 @@ export default function Home() {
               <p className="body-text" style={{ marginBottom: "1rem" }}>Investidores inteligentes já se movimentaram:</p>
               <motion.ul variants={STAGGER_CONTAINER} initial="hidden" animate="show" className="checklist">
                 {[
-                  "Maior valorização imobiliária — em aceleração",
-                  "Procura internacional recorde",
-                  "Tech hub + universidade a crescer",
-                  "Oferta residencial criticamente baixa"
+                  { text: "Maior valorização imobiliária — em aceleração", icon: <Check size={18} className="text-green-500" /> },
+                  { text: "Procura internacional recorde", icon: <Check size={18} className="text-green-500" /> },
+                  { text: "Tech hub + universidade a crescer", icon: <Check size={18} className="text-green-500" /> },
+                  { text: "Oferta residencial criticamente baixa", icon: <Check size={18} className="text-green-500" /> }
                 ].map((item, i) => (
                   <motion.li variants={STAGGER_ITEM} key={i} className="checklist-item">
-                    <span className="checklist-icon"><Check size={18} className="text-green-500" /></span>
-                    <span>{item}</span>
+                    <span className="checklist-icon">{item.icon}</span>
+                    <span>{item.text}</span>
                   </motion.li>
                 ))}
               </motion.ul>
@@ -677,11 +700,11 @@ export default function Home() {
               <h2 className="section-title">A nossa abordagem operacional em Aveiro</h2>
               <motion.div variants={STAGGER_CONTAINER} initial="hidden" animate="show" className="approach-detailed">
                 {[
-                  { icon: "🔎", title: "Seleção criteriosa", desc: "Apenas ativos com potencial comprovado. Fora de mercado. Zonas de valorização acelerada." },
-                  { icon: "🏛", title: "Estruturação conservadora", desc: "Capital protegido primeiro. Retorno depois. Margens de segurança em todos os cenários." },
+                  { icon: "🔎", title: "Seleção criteriosa", desc: "Apenas ativos com potencial comprovado. Fora de mercado. Zonas de valorização acelerada. Filtramos 95% antes de apresentar." },
+                  { icon: "🏛", title: "Estruturação conservadora", desc: "Capital protegido primeiro. Retorno depois. Margens de segurança em todos os cenários — mesmo nos pessimistas." },
                   { icon: "🛡", title: "Margens de segurança", desc: "Buffer para imprevistos, atrasos, correções de mercado. Nunca trabalhamos com orçamentos justos." },
-                  { icon: "🗺", title: "Planeamento de saída", desc: "Estratégia de saída definida antes da compra. Sabemos a quem vender, quando, por quanto." },
-                  { icon: "✓", title: "Controlo de execução", desc: "Equipa local em Aveiro. Acompanhamento semanal: obra, licenciamentos, prazos." }
+                  { icon: "🗺", title: "Planeamento de saída", desc: "Estratégia de saída definida antes da compra. Sabemos a quem vender, quando, por quanto — antes de entrar." },
+                  { icon: "✓", title: "Controlo de execução", desc: "Equipa local em Aveiro. Acompanhamento semanal: obra, licenciamentos, prazos. Problemas resolvidos antes de escalarem." }
                 ].map((item, i) => (
                   <motion.div variants={STAGGER_ITEM} key={i} className="approach-item">
                     <div className="approach-header">
@@ -700,9 +723,10 @@ export default function Home() {
               <div className="spacer-lg" />
 
               <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
                 className="user-photo-card"
               >
                 <div className="photo-with-logo">
@@ -718,7 +742,8 @@ export default function Home() {
               <div className="solution-block">
                 <h3 className="section-title">Metodologia Silvermont</h3>
                 <p className="body-text-lg">Não trabalhamos como os outros. <strong>Zero portais. Zero ofertas públicas.</strong></p>
-                <p className="body-text-lg" style={{ marginTop: "0.75rem" }}>Cada operação é estruturada ao detalhe. <strong>Não vendemos sonhos. Entregamos operações blindadas.</strong></p>
+                <p className="body-text-lg" style={{ marginTop: "0.75rem" }}>Cada operação é estruturada ao detalhe. Cada variável, controlada. Cada risco, mitigado. <strong>Não vendemos sonhos. Entregamos operações blindadas.</strong></p>
+                <p className="body-text-lg" style={{ marginTop: "0.75rem" }}>Reconversão inteligente. Ciclos rápidos. Risco controlado. <strong>Esta é a diferença entre amadores e operadores profissionais.</strong></p>
               </div>
 
               <motion.button

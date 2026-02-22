@@ -246,7 +246,6 @@ h3 {
   border: none;
   cursor: pointer;
   padding: 0;
-  transition: transform 200ms var(--ease-smooth), opacity 200ms;
 }
 
 .logo-clickable:hover {
@@ -317,7 +316,6 @@ h3 {
   border: none;
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 200ms var(--ease-smooth);
   letter-spacing: 0.01em;
 }
 
@@ -347,7 +345,6 @@ h3 {
   border-radius: var(--radius-md);
   cursor: pointer;
   text-align: center;
-  transition: all 200ms var(--ease-smooth);
   letter-spacing: 0.01em;
 }
 
@@ -533,7 +530,6 @@ h3 {
   border: 1.5px solid var(--border-card);
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 200ms var(--ease-smooth);
   position: relative;
   overflow: hidden;
   -webkit-tap-highlight-color: transparent;
