@@ -19,6 +19,11 @@ export async function initLeadAction(params: {
     utm_source?: string;
     utm_campaign?: string;
 }) {
+    // Debug: confirm env vars are loaded
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    console.log("[Supabase] URL set:", !!url, "| KEY set:", !!key && key !== "COLOCA_AQUI_A_TUA_ANON_KEY");
+
     try {
         // Strip non-numeric chars so phone fits the `numeric` column
         const phoneNum = params.phone
@@ -36,9 +41,10 @@ export async function initLeadAction(params: {
             status: false,              // DO NOT change — bool column
         });
 
+        console.log("[Supabase] Lead created with id:", id);
         return { success: true, id };
     } catch (error) {
-        console.error("Supabase initLead error:", error);
+        console.error("[Supabase] initLead FAILED:", JSON.stringify(error));
         return { success: false, id: null };
     }
 }
