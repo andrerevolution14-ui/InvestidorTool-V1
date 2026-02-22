@@ -172,16 +172,19 @@ export default function Home() {
 
   const selectCapital = useCallback((v: string) => {
     setCapital(v);
+    trackPixel("CustomizeProduct", { content_name: "select_capital", content_value: v });
     setTimeout(() => go("q2"), 200);
   }, [go]);
 
   const selectHorizon = useCallback((v: string) => {
     setHorizon(v);
+    trackPixel("CustomizeProduct", { content_name: "select_horizon", content_value: v });
     setTimeout(() => go("q3"), 200);
   }, [go]);
 
   const selectMindset = useCallback(async (v: string) => {
     setMindset(v);
+    trackPixel("SubmitApplication", { content_name: "complete_quiz", mindset: v });
     setTimeout(async () => {
       go("processing");
       const capitalLabel = CAPITAL_OPTIONS.find(o => o.value === capital)?.label || capital;
@@ -206,7 +209,10 @@ export default function Home() {
           preferencia: mindsetLabel,
         }).catch(() => { });
       }
-      setTimeout(() => go("results"), 1800);
+      setTimeout(() => {
+        trackPixel("ViewContent", { content_name: "view_results" });
+        go("results");
+      }, 1800);
     }, 200);
   }, [capital, horizon, go]);
 
