@@ -5,41 +5,35 @@ const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Exactly matches the Supabase table "investidores database" (id: 17452)
-// Run the following SQL in Supabase to add the tracking columns:
-//
-// ALTER TABLE "investidores database"
-//   ADD COLUMN IF NOT EXISTS fb_lead_id   text,
-//   ADD COLUMN IF NOT EXISTS fbclid        text,
-//   ADD COLUMN IF NOT EXISTS utm_source    text,
-//   ADD COLUMN IF NOT EXISTS utm_campaign  text,
-//   ADD COLUMN IF NOT EXISTS updated_at    timestamptz;
-
+// Matches "Investidores Database" table schema
 export interface SimulationLead {
-    // Contact data — passed by Meta Instant Form via URL params
-    Name?: string | null;   // text
-    Phone?: number | null;   // numeric
-    Email?: string | null;   // text
+    // Contact data from Meta Instant Form (URL params)
+    Name?: string | null;
+    Phone?: number | null;
+    Email?: string | null;
 
-    // Meta tracking — passed via URL params
-    fb_lead_id?: string | null;  // text (new column)
-    fbclid?: string | null;  // text (new column)
-    utm_source?: string | null;  // text (new column)
-    utm_campaign?: string | null; // text (new column)
+    // Meta tracking
+    fb_lead_id?: string | null;
+    fbclid?: string | null;
+    utm_source?: string | null;
+    utm_campaign?: string | null;
 
-    // Quiz answers
-    Capital?: string | null; // text
-    Retorno?: string | null; // text — Q2: horizonte de retorno
-    Gestão?: string | null; // text — Q3: preferência de gestão
+    // Quiz answers (set after Q3)
+    Capital?: string | null;
+    Retorno?: string | null;
+    "Gestão"?: string | null;
 
-    // Status (DO NOT change — bool column, default false)
+    // status bool — user manages manually, never touched by code
     status?: boolean;
+
+    // Quiz completion flag — false on insert, true after Q3
+    quiz?: boolean;
 
     // Timestamps
     updated_at?: string;
 }
 
-/** Insert a new lead row. Returns the generated int8 id. */
+/** Insert a new lead row on page load. Returns the row id. */
 export async function createSimulationLead(data: SimulationLead): Promise<number> {
     const { data: row, error } = await supabase
         .from("Investidores Database")

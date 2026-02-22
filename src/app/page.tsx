@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import ProgressBar from "@/components/ProgressBar";
-import { saveCompleteLeadAction } from "./actions";
+import { initLeadAction, completeLeadAction } from "./actions";
 
 type Step = "hero" | "q1" | "q2" | "q3" | "processing" | "results" | "anchoring" | "rational" | "analysis" | "strategy" | "presentation" | "final";
 
@@ -99,25 +99,24 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
   const [showScrollHint, setShowScrollHint] = useState(false);
   const [exiting, setExiting] = useState(false);
-  const metaParamsRef = useRef<{
-    name?: string; email?: string; phone?: string;
-    fb_lead_id?: string; fbclid?: string;
-    utm_source?: string; utm_campaign?: string;
-  }>({});
+  const leadIdRef = useRef<number | null>(null);
 
   useEffect(() => {
-    // Parse Meta Instant Form params — stored in memory only.
-    // Supabase INSERT happens after Q3 with ALL data complete.
+    // Parse Meta Instant Form params and immediately INSERT a partial lead (quiz=false).
+    // Row is updated with quiz answers after Q3 (quiz=true).
     const params = new URLSearchParams(window.location.search);
-    metaParamsRef.current = {
-      name: params.get("first_name") || params.get("full_name") || params.get("name") || undefined,
-      email: params.get("email") || undefined,
-      phone: params.get("phone_number") || params.get("phone") || undefined,
-      fb_lead_id: params.get("lead_id") || params.get("fb_lead_id") || undefined,
-      fbclid: params.get("fbclid") || undefined,
-      utm_source: params.get("utm_source") || undefined,
-      utm_campaign: params.get("utm_campaign") || undefined,
-    };
+    const name = params.get("full_name") || params.get("first_name") || params.get("name") || undefined;
+    const email = params.get("email") || undefined;
+    const phone = params.get("phone_number") || params.get("phone") || undefined;
+    const fb_lead_id = params.get("lead_id") || params.get("fb_lead_id") || undefined;
+    const fbclid = params.get("fbclid") || undefined;
+    const utm_source = params.get("utm_source") || undefined;
+    const utm_campaign = params.get("utm_campaign") || undefined;
+
+    initLeadAction({ name, email, phone, fb_lead_id, fbclid, utm_source, utm_campaign })
+      .then(({ id }) => { if (id) leadIdRef.current = id; })
+      .catch(() => { });
+
     setReady(true);
   }, []);
 
@@ -164,16 +163,16 @@ export default function Home() {
     setMindset(v);
     setTimeout(async () => {
       go("processing");
-      // Single INSERT with ALL data — automation only sees complete rows
-      const capitalLabel = CAPITAL_OPTIONS.find(o => o.value === capital)?.label || capital;
-      const horizonLabel = HORIZON_OPTIONS.find(o => o.value === horizon)?.label || horizon;
-      const mindsetLabel = MINDSET_OPTIONS.find(o => o.value === v)?.label || v;
-      saveCompleteLeadAction({
-        ...metaParamsRef.current,
-        capital: capitalLabel,
-        horizonte: horizonLabel,
-        preferencia: mindsetLabel,
-      }).catch(() => { });
+      if (leadIdRef.current) {
+        const capitalLabel = CAPITAL_OPTIONS.find(o => o.value === capital)?.label || capital;
+        const horizonLabel = HORIZON_OPTIONS.find(o => o.value === horizon)?.label || horizon;
+        const mindsetLabel = MINDSET_OPTIONS.find(o => o.value === v)?.label || v;
+        completeLeadAction(leadIdRef.current, {
+          capital: capitalLabel,
+          horizonte: horizonLabel,
+          preferencia: mindsetLabel,
+        }).catch(() => { });
+      }
       setTimeout(() => go("results"), 1800);
     }, 200);
   }, [capital, horizon, go]);

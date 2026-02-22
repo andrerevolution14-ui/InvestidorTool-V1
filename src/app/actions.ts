@@ -1,14 +1,14 @@
 "use server";
 
-import { createSimulationLead } from "@/lib/supabase";
+import { createSimulationLead, updateSimulationLead } from "@/lib/supabase";
 
 /**
- * Called ONCE after Q3 is answered — inserts a single complete row into Supabase.
- * All data (Meta contact + quiz answers) is written at the same time,
- * so automations always see a fully populated row.
+ * Called on PAGE LOAD.
+ * Inserts contact data from Meta Instant Form immediately.
+ * quiz = false (quiz not yet completed).
+ * Returns the row id so the client can update it after Q3.
  */
-export async function saveCompleteLeadAction(data: {
-    // Meta Instant Form contact data (from URL params)
+export async function initLeadAction(params: {
     name?: string;
     email?: string;
     phone?: string;
@@ -16,38 +16,59 @@ export async function saveCompleteLeadAction(data: {
     fbclid?: string;
     utm_source?: string;
     utm_campaign?: string;
-    // Quiz answers (full labels)
-    capital: string;
-    horizonte: string;
-    preferencia: string;
 }) {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     console.log("[Supabase] URL set:", !!url, "| KEY set:", !!key && key !== "COLOCA_AQUI_A_TUA_ANON_KEY");
 
     try {
-        const phoneNum = data.phone
-            ? Number(data.phone.replace(/\D/g, "")) || null
+        const phoneNum = params.phone
+            ? Number(params.phone.replace(/\D/g, "")) || null
             : null;
 
         const id = await createSimulationLead({
-            Name: data.name || null,
-            Email: data.email || null,
+            Name: params.name || null,
+            Email: params.email || null,
             Phone: phoneNum,
-            fb_lead_id: data.fb_lead_id || null,
-            fbclid: data.fbclid || null,
-            utm_source: data.utm_source || null,
-            utm_campaign: data.utm_campaign || null,
+            fb_lead_id: params.fb_lead_id || null,
+            fbclid: params.fbclid || null,
+            utm_source: params.utm_source || null,
+            utm_campaign: params.utm_campaign || null,
+            quiz: false,   // will be set to true after Q3
+        });
+
+        console.log("[Supabase] Lead created with id:", id);
+        return { success: true, id };
+    } catch (error) {
+        console.error("[Supabase] initLead FAILED:", JSON.stringify(error));
+        return { success: false, id: null };
+    }
+}
+
+/**
+ * Called after Q3 is answered.
+ * Updates the existing row with quiz answers and sets quiz = true.
+ */
+export async function completeLeadAction(
+    id: number,
+    data: {
+        capital: string;    // → Capital
+        horizonte: string;  // → Retorno
+        preferencia: string; // → Gestão
+    }
+) {
+    if (!id) return { success: false };
+    try {
+        await updateSimulationLead(id, {
             Capital: data.capital,
             Retorno: data.horizonte,
             "Gestão": data.preferencia,
-            status: false,
+            quiz: true,   // quiz completed
         });
-
-        console.log("[Supabase] Complete lead saved with id:", id);
-        return { success: true, id };
+        console.log("[Supabase] Lead completed, id:", id);
+        return { success: true };
     } catch (error) {
-        console.error("[Supabase] saveCompleteLead FAILED:", JSON.stringify(error));
-        return { success: false, id: null };
+        console.error("[Supabase] completeLead FAILED:", JSON.stringify(error));
+        return { success: false };
     }
 }
