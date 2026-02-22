@@ -7,9 +7,9 @@ import ProgressBar from "@/components/ProgressBar";
 import { savePartialLeadAction, saveCompleteLeadAction, upgradeLeadAction } from "./actions";
 
 const PAGE_TRANSITION: any = {
-  initial: { opacity: 0, y: 20 },
+  initial: { opacity: 0, y: -20 },
   animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -20 },
+  exit: { opacity: 0, y: 20 },
   transition: { duration: 0.5 }
 };
 
@@ -22,7 +22,7 @@ const STAGGER_CONTAINER: Variants = {
 };
 
 const STAGGER_ITEM: Variants = {
-  hidden: { opacity: 0, y: 15 },
+  hidden: { opacity: 0, y: -15 },
   show: { opacity: 1, y: 0, transition: { duration: 0.4 } }
 };
 
@@ -445,6 +445,18 @@ export default function Home() {
                 </div>
               </motion.div>
 
+              <div className="verdict-card verdict-red" style={{ marginTop: "1rem" }}>
+                <div className="verdict-icon"><X className="text-red-500" /></div>
+                <div>
+                  <h3 className="verdict-title-sm">Não invista se...</h3>
+                  <ul className="verdict-list">
+                    <li><span className="x-icon"><X size={14} /></span>Não tem capital realmente disponível</li>
+                    <li><span className="x-icon"><X size={14} /></span>Espera lucros sem estrutura profissional</li>
+                    <li><span className="x-icon"><X size={14} /></span>Não quer trabalhar com operadores no terreno</li>
+                  </ul>
+                </div>
+              </div>
+
               <div className="spacer" />
 
               <motion.div variants={STAGGER_CONTAINER} initial="hidden" animate="show">
@@ -484,17 +496,6 @@ export default function Home() {
                 </div>
               </motion.div>
 
-              <div className="verdict-card verdict-red" style={{ marginTop: "1.5rem" }}>
-                <div className="verdict-icon"><X className="text-red-500" /></div>
-                <div>
-                  <h3 className="verdict-title-sm">Não invista se...</h3>
-                  <ul className="verdict-list">
-                    <li><span className="x-icon"><X size={14} /></span>Não tem capital realmente disponível</li>
-                    <li><span className="x-icon"><X size={14} /></span>Espera lucros sem estrutura profissional</li>
-                    <li><span className="x-icon"><X size={14} /></span>Não quer trabalhar com operadores no terreno</li>
-                  </ul>
-                </div>
-              </div>
 
               <motion.p variants={STAGGER_ITEM} initial="hidden" animate="show" transition={{ delay: 1 }} className="result-note">Baseado em médias de mercado na região de Aveiro.</motion.p>
 
@@ -752,22 +753,16 @@ export default function Home() {
 
               <div className="spacer-lg" />
 
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
-                className="user-photo-card"
-              >
+              <div className="user-photo-card" style={{ opacity: 1, transform: 'none' }}>
                 <div className="photo-with-logo">
-                  <img src="/user-photo.jpg" alt="Estrategista" className="user-photo-img" loading="lazy" />
-                  <img src="/logo-horizontal.png" alt="Silvermont Capital" className="photo-logo-xl" loading="lazy" />
+                  <img src="/user-photo.jpg" alt="Estrategista" className="user-photo-img" loading="eager" />
+                  <img src="/logo-horizontal.png" alt="Silvermont Capital" className="photo-logo-xl" loading="eager" />
                 </div>
                 <div className="user-photo-info">
                   <span className="user-photo-name">Estrategista de Operações</span>
                   <span className="user-photo-tag">Silvermont Capital</span>
                 </div>
-              </motion.div>
+              </div>
 
               <div className="solution-block">
                 <h3 className="section-title">Metodologia Silvermont</h3>
@@ -795,7 +790,7 @@ export default function Home() {
             <Logo size="lg" onClick={restart} />
             <div className="step-inner" style={{ textAlign: "center", maxWidth: "520px" }}>
               <motion.h2
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="section-title"
                 style={{ textAlign: "center" }}
@@ -838,9 +833,9 @@ export default function Home() {
       <AnimatePresence>
         {showScrollHint && (
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
+            exit={{ opacity: 0, y: -10 }}
             className="scroll-hint"
             aria-hidden="true"
           >
@@ -851,6 +846,6 @@ export default function Home() {
           </motion.div>
         )}
       </AnimatePresence>
-    </main>
+    </main >
   );
 }
