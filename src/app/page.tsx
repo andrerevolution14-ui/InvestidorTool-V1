@@ -103,13 +103,20 @@ export default function Home() {
 
   useEffect(() => {
     // Parse Meta Instant Form params from URL
+    // Configure the Meta form "Thank You URL" as:
+    // https://yoursite.com?first_name={{first_name}}&email={{email}}&phone_number={{phone_number}}&lead_id={{lead_id}}&fbclid={{fbclid}}
     const params = new URLSearchParams(window.location.search);
+
+    const name = params.get("first_name") || params.get("full_name") || params.get("name") || undefined;
+    const email = params.get("email") || undefined;
+    const phone = params.get("phone_number") || params.get("phone") || undefined;
+
     const fb_lead_id = params.get("lead_id") || params.get("fb_lead_id") || undefined;
     const fbclid = params.get("fbclid") || undefined;
     const utm_source = params.get("utm_source") || undefined;
     const utm_campaign = params.get("utm_campaign") || undefined;
 
-    initLeadAction({ fb_lead_id, fbclid, utm_source, utm_campaign })
+    initLeadAction({ name, email, phone, fb_lead_id, fbclid, utm_source, utm_campaign })
       .then(({ id }) => { if (id) leadIdRef.current = id; })
       .catch(() => { });
 

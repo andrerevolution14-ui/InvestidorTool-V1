@@ -7,7 +7,11 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 export interface SimulationLead {
     id?: string;
-    // Meta Instant Form tracking
+    // Meta Instant Form — contact data passed via URL params
+    name?: string | null;
+    email?: string | null;
+    phone?: string | null;
+    // Meta tracking IDs
     fb_lead_id?: string | null;
     fbclid?: string | null;
     utm_source?: string | null;
@@ -24,8 +28,10 @@ export interface SimulationLead {
     updated_at?: string;
 }
 
-/** Create a new lead row at funnel entry, returns the row id */
-export async function createSimulationLead(data: Omit<SimulationLead, "id" | "created_at" | "updated_at">) {
+/** Create a new lead row at funnel entry, returns the Supabase row id */
+export async function createSimulationLead(
+    data: Omit<SimulationLead, "id" | "created_at" | "updated_at">
+) {
     const { data: row, error } = await supabase
         .from("simulation_leads")
         .insert({ ...data, created_at: new Date().toISOString() })

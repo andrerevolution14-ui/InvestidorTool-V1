@@ -2,8 +2,15 @@
 
 import { createSimulationLead, updateSimulationLead } from "@/lib/supabase";
 
-/** Called on page load — creates the lead row and returns the Supabase row id */
+/**
+ * Called on page load.
+ * Receives all Meta Instant Form params (name, email, phone) + tracking params from the URL.
+ * Creates the Supabase row and returns the row id so the client can update it later.
+ */
 export async function initLeadAction(params: {
+    name?: string;
+    email?: string;
+    phone?: string;
     fb_lead_id?: string;
     fbclid?: string;
     utm_source?: string;
@@ -11,6 +18,9 @@ export async function initLeadAction(params: {
 }) {
     try {
         const id = await createSimulationLead({
+            name: params.name || null,
+            email: params.email || null,
+            phone: params.phone || null,
             fb_lead_id: params.fb_lead_id || null,
             fbclid: params.fbclid || null,
             utm_source: params.utm_source || null,
@@ -25,7 +35,7 @@ export async function initLeadAction(params: {
     }
 }
 
-/** Called after each quiz answer / step reached */
+/** Called after each quiz answer / step navigation to update the same row */
 export async function updateLeadAction(
     id: string,
     data: {
