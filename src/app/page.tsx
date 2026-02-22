@@ -154,13 +154,15 @@ export default function Home() {
 
   const selectCapital = useCallback((v: string) => {
     setCapital(v);
-    if (leadIdRef.current) updateLeadAction(leadIdRef.current, { capital: v }).catch(() => { });
+    const label = CAPITAL_OPTIONS.find(o => o.value === v)?.label || v;
+    if (leadIdRef.current) updateLeadAction(leadIdRef.current, { capital: label }).catch(() => { });
     setTimeout(() => go("q2"), 200);
   }, [go]);
 
   const selectHorizon = useCallback((v: string) => {
     setHorizon(v);
-    if (leadIdRef.current) updateLeadAction(leadIdRef.current, { horizonte: v }).catch(() => { });
+    const label = HORIZON_OPTIONS.find(o => o.value === v)?.label || v;
+    if (leadIdRef.current) updateLeadAction(leadIdRef.current, { horizonte: label }).catch(() => { });
     setTimeout(() => go("q3"), 200);
   }, [go]);
 
@@ -169,7 +171,9 @@ export default function Home() {
     setTimeout(async () => {
       go("processing");
       if (leadIdRef.current) {
-        updateLeadAction(leadIdRef.current, { preferencia: v, completed: true }).catch(() => { });
+        const label = MINDSET_OPTIONS.find(o => o.value === v)?.label || v;
+        updateLeadAction(leadIdRef.current, { preferencia: label, completed: true }).catch(() => { });
+
       }
       setTimeout(() => go("results"), 1800);
     }, 200);
