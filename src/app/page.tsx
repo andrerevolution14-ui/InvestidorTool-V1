@@ -184,6 +184,7 @@ export default function Home() {
       if (timerFiredRef.current && leadIdRef.current) {
         // Timer already fired — partial row exists → upgrade it to complete
         upgradeLeadAction(leadIdRef.current, {
+          ...metaParamsRef.current,
           capital: capitalLabel,
           horizonte: horizonLabel,
           preferencia: mindsetLabel,

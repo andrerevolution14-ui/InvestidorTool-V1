@@ -1,6 +1,8 @@
 "use server";
 
 import { createSimulationLead, updateSimulationLead } from "@/lib/supabase";
+import { sendMetaEvent } from "@/lib/meta-pixel";
+import { headers, cookies } from "next/headers";
 
 type MetaParams = {
     name?: string;
@@ -34,6 +36,33 @@ export async function savePartialLeadAction(params: MetaParams) {
             quiz: false,
         });
         console.log("[Supabase] Partial lead saved (quiz=false), id:", id);
+
+        // Meta CAPI
+        if (params.email || params.phone) {
+            const head = await headers();
+            const cookieStore = await cookies();
+            const sourceUrl = head.get("referer") || "";
+            const userAgent = head.get("user-agent") || "";
+            const ip = head.get("x-forwarded-for")?.split(",")[0] || head.get("x-real-ip") || "";
+            const fbp = cookieStore.get("_fbp")?.value;
+
+            await sendMetaEvent({
+                eventName: "Lead",
+                email: params.email,
+                phone: params.phone,
+                firstName: params.name,
+                fbc: params.fbclid ? `fb.1.${Math.floor(Date.now() / 1000)}.${params.fbclid}` : undefined,
+                fbp,
+                clientIpAddress: ip,
+                clientUserAgent: userAgent,
+                eventSourceUrl: sourceUrl,
+                customData: {
+                    quiz_completed: false,
+                    lead_id: id
+                }
+            });
+        }
+
         return { success: true, id };
     } catch (error) {
         console.error("[Supabase] savePartialLead FAILED:", JSON.stringify(error));
@@ -63,6 +92,32 @@ export async function saveCompleteLeadAction(
             quiz: true,
         });
         console.log("[Supabase] Complete lead saved (quiz=true), id:", id);
+
+        // Meta CAPI
+        const head = await headers();
+        const cookieStore = await cookies();
+        const sourceUrl = head.get("referer") || "";
+        const userAgent = head.get("user-agent") || "";
+        const ip = head.get("x-forwarded-for")?.split(",")[0] || head.get("x-real-ip") || "";
+        const fbp = cookieStore.get("_fbp")?.value;
+
+        await sendMetaEvent({
+            eventName: "Lead",
+            email: params.email,
+            phone: params.phone,
+            firstName: params.name,
+            fbc: params.fbclid ? `fb.1.${Math.floor(Date.now() / 1000)}.${params.fbclid}` : undefined,
+            fbp,
+            clientIpAddress: ip,
+            clientUserAgent: userAgent,
+            eventSourceUrl: sourceUrl,
+            customData: {
+                quiz_completed: true,
+                capital: params.capital,
+                lead_id: id
+            }
+        });
+
         return { success: true, id };
     } catch (error) {
         console.error("[Supabase] saveCompleteLead FAILED:", JSON.stringify(error));
@@ -76,7 +131,7 @@ export async function saveCompleteLeadAction(
  */
 export async function upgradeLeadAction(
     id: number,
-    data: { capital: string; horizonte: string; preferencia: string }
+    data: MetaParams & { capital: string; horizonte: string; preferencia: string }
 ) {
     try {
         await updateSimulationLead(id, {
@@ -86,6 +141,33 @@ export async function upgradeLeadAction(
             quiz: true,
         });
         console.log("[Supabase] Partial lead upgraded to complete (quiz=true), id:", id);
+
+        // Meta CAPI
+        const head = await headers();
+        const cookieStore = await cookies();
+        const sourceUrl = head.get("referer") || "";
+        const userAgent = head.get("user-agent") || "";
+        const ip = head.get("x-forwarded-for")?.split(",")[0] || head.get("x-real-ip") || "";
+        const fbp = cookieStore.get("_fbp")?.value;
+
+        await sendMetaEvent({
+            eventName: "Lead",
+            email: data.email,
+            phone: data.phone,
+            firstName: data.name,
+            fbc: data.fbclid ? `fb.1.${Math.floor(Date.now() / 1000)}.${data.fbclid}` : undefined,
+            fbp,
+            clientIpAddress: ip,
+            clientUserAgent: userAgent,
+            eventSourceUrl: sourceUrl,
+            customData: {
+                quiz_completed: true,
+                capital: data.capital,
+                lead_id: id,
+                upgraded: true
+            }
+        });
+
         return { success: true };
     } catch (error) {
         console.error("[Supabase] upgradeLead FAILED:", JSON.stringify(error));
