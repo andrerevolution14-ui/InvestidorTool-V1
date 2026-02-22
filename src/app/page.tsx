@@ -99,24 +99,19 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
   const [showScrollHint, setShowScrollHint] = useState(false);
   const [exiting, setExiting] = useState(false);
-  const leadIdRef = useRef<string | null>(null);
+  const leadIdRef = useRef<number | null>(null);
 
   useEffect(() => {
     // Parse Meta Instant Form params from URL
     // Configure the Meta form "Thank You URL" as:
-    // https://yoursite.com?first_name={{first_name}}&email={{email}}&phone_number={{phone_number}}&lead_id={{lead_id}}&fbclid={{fbclid}}
+    // https://yoursite.com?first_name={{first_name}}&email={{email}}&phone_number={{phone_number}}
     const params = new URLSearchParams(window.location.search);
 
     const name = params.get("first_name") || params.get("full_name") || params.get("name") || undefined;
     const email = params.get("email") || undefined;
     const phone = params.get("phone_number") || params.get("phone") || undefined;
 
-    const fb_lead_id = params.get("lead_id") || params.get("fb_lead_id") || undefined;
-    const fbclid = params.get("fbclid") || undefined;
-    const utm_source = params.get("utm_source") || undefined;
-    const utm_campaign = params.get("utm_campaign") || undefined;
-
-    initLeadAction({ name, email, phone, fb_lead_id, fbclid, utm_source, utm_campaign })
+    initLeadAction({ name, email, phone })
       .then(({ id }) => { if (id) leadIdRef.current = id; })
       .catch(() => { });
 
@@ -154,13 +149,13 @@ export default function Home() {
 
   const selectCapital = useCallback((v: string) => {
     setCapital(v);
-    if (leadIdRef.current) updateLeadAction(leadIdRef.current, { capital: v, step_reached: "q2" }).catch(() => { });
+    if (leadIdRef.current) updateLeadAction(leadIdRef.current, { capital: v }).catch(() => { });
     setTimeout(() => go("q2"), 200);
   }, [go]);
 
   const selectHorizon = useCallback((v: string) => {
     setHorizon(v);
-    if (leadIdRef.current) updateLeadAction(leadIdRef.current, { horizonte: v, step_reached: "q3" }).catch(() => { });
+    if (leadIdRef.current) updateLeadAction(leadIdRef.current, { horizonte: v }).catch(() => { });
     setTimeout(() => go("q3"), 200);
   }, [go]);
 
@@ -169,7 +164,7 @@ export default function Home() {
     setTimeout(async () => {
       go("processing");
       if (leadIdRef.current) {
-        updateLeadAction(leadIdRef.current, { preferencia: v, step_reached: "results", completed: true }).catch(() => { });
+        updateLeadAction(leadIdRef.current, { preferencia: v, completed: true }).catch(() => { });
       }
       setTimeout(() => go("results"), 1800);
     }, 200);
