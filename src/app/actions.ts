@@ -2,13 +2,7 @@
 
 import { createSimulationLead, updateSimulationLead } from "@/lib/supabase";
 
-/**
- * Called on PAGE LOAD.
- * Inserts contact data from Meta Instant Form immediately.
- * quiz = false (quiz not yet completed).
- * Returns the row id so the client can update it after Q3.
- */
-export async function initLeadAction(params: {
+type MetaParams = {
     name?: string;
     email?: string;
     phone?: string;
@@ -16,59 +10,85 @@ export async function initLeadAction(params: {
     fbclid?: string;
     utm_source?: string;
     utm_campaign?: string;
-}) {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    console.log("[Supabase] URL set:", !!url, "| KEY set:", !!key && key !== "COLOCA_AQUI_A_TUA_ANON_KEY");
+};
 
+function sanitizePhone(phone?: string): number | null {
+    if (!phone) return null;
+    return Number(phone.replace(/\D/g, "")) || null;
+}
+
+/**
+ * Called after 10 minutes if the user hasn't completed Q3.
+ * Inserts a partial lead with quiz = false.
+ */
+export async function savePartialLeadAction(params: MetaParams) {
     try {
-        const phoneNum = params.phone
-            ? Number(params.phone.replace(/\D/g, "")) || null
-            : null;
-
         const id = await createSimulationLead({
             Name: params.name || null,
             Email: params.email || null,
-            Phone: phoneNum,
+            Phone: sanitizePhone(params.phone),
             fb_lead_id: params.fb_lead_id || null,
             fbclid: params.fbclid || null,
             utm_source: params.utm_source || null,
             utm_campaign: params.utm_campaign || null,
-            quiz: false,   // will be set to true after Q3
+            quiz: false,
         });
-
-        console.log("[Supabase] Lead created with id:", id);
+        console.log("[Supabase] Partial lead saved (quiz=false), id:", id);
         return { success: true, id };
     } catch (error) {
-        console.error("[Supabase] initLead FAILED:", JSON.stringify(error));
+        console.error("[Supabase] savePartialLead FAILED:", JSON.stringify(error));
         return { success: false, id: null };
     }
 }
 
 /**
- * Called after Q3 is answered.
- * Updates the existing row with quiz answers and sets quiz = true.
+ * Called immediately when Q3 is completed (timer not yet fired).
+ * Inserts a complete lead with all data and quiz = true.
  */
-export async function completeLeadAction(
-    id: number,
-    data: {
-        capital: string;    // → Capital
-        horizonte: string;  // → Retorno
-        preferencia: string; // → Gestão
-    }
+export async function saveCompleteLeadAction(
+    params: MetaParams & { capital: string; horizonte: string; preferencia: string }
 ) {
-    if (!id) return { success: false };
+    try {
+        const id = await createSimulationLead({
+            Name: params.name || null,
+            Email: params.email || null,
+            Phone: sanitizePhone(params.phone),
+            fb_lead_id: params.fb_lead_id || null,
+            fbclid: params.fbclid || null,
+            utm_source: params.utm_source || null,
+            utm_campaign: params.utm_campaign || null,
+            Capital: params.capital,
+            Retorno: params.horizonte,
+            "Gestão": params.preferencia,
+            quiz: true,
+        });
+        console.log("[Supabase] Complete lead saved (quiz=true), id:", id);
+        return { success: true, id };
+    } catch (error) {
+        console.error("[Supabase] saveCompleteLead FAILED:", JSON.stringify(error));
+        return { success: false, id: null };
+    }
+}
+
+/**
+ * Called when Q3 is completed AFTER the 10-min timeout already inserted a partial row.
+ * Updates the existing partial row with quiz answers and sets quiz = true.
+ */
+export async function upgradeLeadAction(
+    id: number,
+    data: { capital: string; horizonte: string; preferencia: string }
+) {
     try {
         await updateSimulationLead(id, {
             Capital: data.capital,
             Retorno: data.horizonte,
             "Gestão": data.preferencia,
-            quiz: true,   // quiz completed
+            quiz: true,
         });
-        console.log("[Supabase] Lead completed, id:", id);
+        console.log("[Supabase] Partial lead upgraded to complete (quiz=true), id:", id);
         return { success: true };
     } catch (error) {
-        console.error("[Supabase] completeLead FAILED:", JSON.stringify(error));
+        console.error("[Supabase] upgradeLead FAILED:", JSON.stringify(error));
         return { success: false };
     }
 }

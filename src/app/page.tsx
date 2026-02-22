@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import ProgressBar from "@/components/ProgressBar";
-import { initLeadAction, completeLeadAction } from "./actions";
+import { savePartialLeadAction, saveCompleteLeadAction, upgradeLeadAction } from "./actions";
 
 type Step = "hero" | "q1" | "q2" | "q3" | "processing" | "results" | "anchoring" | "rational" | "analysis" | "strategy" | "presentation" | "final";
 
@@ -99,25 +99,39 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
   const [showScrollHint, setShowScrollHint] = useState(false);
   const [exiting, setExiting] = useState(false);
-  const leadIdRef = useRef<number | null>(null);
+  // Refs for Supabase lead tracking
+  const metaParamsRef = useRef<{
+    name?: string; email?: string; phone?: string;
+    fb_lead_id?: string; fbclid?: string;
+    utm_source?: string; utm_campaign?: string;
+  }>({});
+  const leadIdRef = useRef<number | null>(null);  // set after partial insert (timer fired)
+  const timerFiredRef = useRef(false);               // true after the 10-min timeout fires
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    // Parse Meta Instant Form params and immediately INSERT a partial lead (quiz=false).
-    // Row is updated with quiz answers after Q3 (quiz=true).
+    // 1. Parse Meta Instant Form params — stored in memory only.
     const params = new URLSearchParams(window.location.search);
-    const name = params.get("full_name") || params.get("first_name") || params.get("name") || undefined;
-    const email = params.get("email") || undefined;
-    const phone = params.get("phone_number") || params.get("phone") || undefined;
-    const fb_lead_id = params.get("lead_id") || params.get("fb_lead_id") || undefined;
-    const fbclid = params.get("fbclid") || undefined;
-    const utm_source = params.get("utm_source") || undefined;
-    const utm_campaign = params.get("utm_campaign") || undefined;
+    metaParamsRef.current = {
+      name: params.get("full_name") || params.get("first_name") || params.get("name") || undefined,
+      email: params.get("email") || undefined,
+      phone: params.get("phone_number") || params.get("phone") || undefined,
+      fb_lead_id: params.get("lead_id") || params.get("fb_lead_id") || undefined,
+      fbclid: params.get("fbclid") || undefined,
+      utm_source: params.get("utm_source") || undefined,
+      utm_campaign: params.get("utm_campaign") || undefined,
+    };
 
-    initLeadAction({ name, email, phone, fb_lead_id, fbclid, utm_source, utm_campaign })
-      .then(({ id }) => { if (id) leadIdRef.current = id; })
-      .catch(() => { });
+    // 2. Start 10-minute timer — inserts partial lead if Q3 is never completed.
+    timerRef.current = setTimeout(() => {
+      timerFiredRef.current = true;
+      savePartialLeadAction(metaParamsRef.current)
+        .then(({ id }) => { if (id) leadIdRef.current = id; })
+        .catch(() => { });
+    }, 10 * 60 * 1000); // 10 minutes
 
     setReady(true);
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   }, []);
 
   useEffect(() => {
@@ -163,11 +177,22 @@ export default function Home() {
     setMindset(v);
     setTimeout(async () => {
       go("processing");
-      if (leadIdRef.current) {
-        const capitalLabel = CAPITAL_OPTIONS.find(o => o.value === capital)?.label || capital;
-        const horizonLabel = HORIZON_OPTIONS.find(o => o.value === horizon)?.label || horizon;
-        const mindsetLabel = MINDSET_OPTIONS.find(o => o.value === v)?.label || v;
-        completeLeadAction(leadIdRef.current, {
+      const capitalLabel = CAPITAL_OPTIONS.find(o => o.value === capital)?.label || capital;
+      const horizonLabel = HORIZON_OPTIONS.find(o => o.value === horizon)?.label || horizon;
+      const mindsetLabel = MINDSET_OPTIONS.find(o => o.value === v)?.label || v;
+
+      if (timerFiredRef.current && leadIdRef.current) {
+        // Timer already fired — partial row exists → upgrade it to complete
+        upgradeLeadAction(leadIdRef.current, {
+          capital: capitalLabel,
+          horizonte: horizonLabel,
+          preferencia: mindsetLabel,
+        }).catch(() => { });
+      } else {
+        // Timer hasn't fired yet — cancel it and insert a complete row directly
+        if (timerRef.current) clearTimeout(timerRef.current);
+        saveCompleteLeadAction({
+          ...metaParamsRef.current,
           capital: capitalLabel,
           horizonte: horizonLabel,
           preferencia: mindsetLabel,
