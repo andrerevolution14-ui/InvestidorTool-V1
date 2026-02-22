@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import ProgressBar from "@/components/ProgressBar";
-import { initLeadAction, updateLeadAction } from "./actions";
+import { saveCompleteLeadAction } from "./actions";
 
 type Step = "hero" | "q1" | "q2" | "q3" | "processing" | "results" | "anchoring" | "rational" | "analysis" | "strategy" | "presentation" | "final";
 
@@ -99,27 +99,25 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
   const [showScrollHint, setShowScrollHint] = useState(false);
   const [exiting, setExiting] = useState(false);
-  const leadIdRef = useRef<number | null>(null);
+  const metaParamsRef = useRef<{
+    name?: string; email?: string; phone?: string;
+    fb_lead_id?: string; fbclid?: string;
+    utm_source?: string; utm_campaign?: string;
+  }>({});
 
   useEffect(() => {
-    // Parse Meta Instant Form params from URL
-    // Configure the Meta form "Thank You URL" as:
-    // https://yoursite.com?first_name={{first_name}}&email={{email}}&phone_number={{phone_number}}&lead_id={{lead_id}}
+    // Parse Meta Instant Form params — stored in memory only.
+    // Supabase INSERT happens after Q3 with ALL data complete.
     const params = new URLSearchParams(window.location.search);
-
-    const name = params.get("first_name") || params.get("full_name") || params.get("name") || undefined;
-    const email = params.get("email") || undefined;
-    const phone = params.get("phone_number") || params.get("phone") || undefined;
-
-    const fb_lead_id = params.get("lead_id") || params.get("fb_lead_id") || undefined;
-    const fbclid = params.get("fbclid") || undefined;
-    const utm_source = params.get("utm_source") || undefined;
-    const utm_campaign = params.get("utm_campaign") || undefined;
-
-    initLeadAction({ name, email, phone, fb_lead_id, fbclid, utm_source, utm_campaign })
-      .then(({ id }) => { if (id) leadIdRef.current = id; })
-      .catch(() => { });
-
+    metaParamsRef.current = {
+      name: params.get("first_name") || params.get("full_name") || params.get("name") || undefined,
+      email: params.get("email") || undefined,
+      phone: params.get("phone_number") || params.get("phone") || undefined,
+      fb_lead_id: params.get("lead_id") || params.get("fb_lead_id") || undefined,
+      fbclid: params.get("fbclid") || undefined,
+      utm_source: params.get("utm_source") || undefined,
+      utm_campaign: params.get("utm_campaign") || undefined,
+    };
     setReady(true);
   }, []);
 
@@ -154,15 +152,11 @@ export default function Home() {
 
   const selectCapital = useCallback((v: string) => {
     setCapital(v);
-    const label = CAPITAL_OPTIONS.find(o => o.value === v)?.label || v;
-    if (leadIdRef.current) updateLeadAction(leadIdRef.current, { capital: label }).catch(() => { });
     setTimeout(() => go("q2"), 200);
   }, [go]);
 
   const selectHorizon = useCallback((v: string) => {
     setHorizon(v);
-    const label = HORIZON_OPTIONS.find(o => o.value === v)?.label || v;
-    if (leadIdRef.current) updateLeadAction(leadIdRef.current, { horizonte: label }).catch(() => { });
     setTimeout(() => go("q3"), 200);
   }, [go]);
 
@@ -170,14 +164,19 @@ export default function Home() {
     setMindset(v);
     setTimeout(async () => {
       go("processing");
-      if (leadIdRef.current) {
-        const label = MINDSET_OPTIONS.find(o => o.value === v)?.label || v;
-        updateLeadAction(leadIdRef.current, { preferencia: label }).catch(() => { });
-
-      }
+      // Single INSERT with ALL data — automation only sees complete rows
+      const capitalLabel = CAPITAL_OPTIONS.find(o => o.value === capital)?.label || capital;
+      const horizonLabel = HORIZON_OPTIONS.find(o => o.value === horizon)?.label || horizon;
+      const mindsetLabel = MINDSET_OPTIONS.find(o => o.value === v)?.label || v;
+      saveCompleteLeadAction({
+        ...metaParamsRef.current,
+        capital: capitalLabel,
+        horizonte: horizonLabel,
+        preferencia: mindsetLabel,
+      }).catch(() => { });
       setTimeout(() => go("results"), 1800);
     }, 200);
-  }, [go]);
+  }, [capital, horizon, go]);
 
   const returns = useMemo(() => getReturns(capital, horizon), [capital, horizon]);
   const capLabel = CAPITAL_OPTIONS.find(o => o.value === capital)?.label || "";
