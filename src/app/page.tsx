@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useCallback, useEffect, useMemo } from "react";
-import Image from "next/image";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import ProgressBar from "@/components/ProgressBar";
-import { saveLeadAction } from "./actions";
+import { initLeadAction, updateLeadAction } from "./actions";
 
 type Step = "hero" | "q1" | "q2" | "q3" | "processing" | "results" | "anchoring" | "rational" | "analysis" | "strategy" | "presentation" | "final";
 
@@ -100,9 +99,20 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
   const [showScrollHint, setShowScrollHint] = useState(false);
   const [exiting, setExiting] = useState(false);
+  const leadIdRef = useRef<string | null>(null);
 
   useEffect(() => {
-    // Always start at hero for new visits
+    // Parse Meta Instant Form params from URL
+    const params = new URLSearchParams(window.location.search);
+    const fb_lead_id = params.get("lead_id") || params.get("fb_lead_id") || undefined;
+    const fbclid = params.get("fbclid") || undefined;
+    const utm_source = params.get("utm_source") || undefined;
+    const utm_campaign = params.get("utm_campaign") || undefined;
+
+    initLeadAction({ fb_lead_id, fbclid, utm_source, utm_campaign })
+      .then(({ id }) => { if (id) leadIdRef.current = id; })
+      .catch(() => { });
+
     setReady(true);
   }, []);
 
@@ -137,11 +147,13 @@ export default function Home() {
 
   const selectCapital = useCallback((v: string) => {
     setCapital(v);
+    if (leadIdRef.current) updateLeadAction(leadIdRef.current, { capital: v, step_reached: "q2" }).catch(() => { });
     setTimeout(() => go("q2"), 200);
   }, [go]);
 
   const selectHorizon = useCallback((v: string) => {
     setHorizon(v);
+    if (leadIdRef.current) updateLeadAction(leadIdRef.current, { horizonte: v, step_reached: "q3" }).catch(() => { });
     setTimeout(() => go("q3"), 200);
   }, [go]);
 
@@ -149,10 +161,12 @@ export default function Home() {
     setMindset(v);
     setTimeout(async () => {
       go("processing");
-      try { await saveLeadAction({ capital, horizonte: horizon, preferencia: v }); } catch { }
+      if (leadIdRef.current) {
+        updateLeadAction(leadIdRef.current, { preferencia: v, step_reached: "results", completed: true }).catch(() => { });
+      }
       setTimeout(() => go("results"), 1800);
     }, 200);
-  }, [capital, horizon, go]);
+  }, [go]);
 
   const returns = useMemo(() => getReturns(capital, horizon), [capital, horizon]);
   const capLabel = CAPITAL_OPTIONS.find(o => o.value === capital)?.label || "";
