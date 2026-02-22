@@ -42,7 +42,7 @@ export interface SimulationLead {
 /** Insert a new lead row. Returns the generated int8 id. */
 export async function createSimulationLead(data: SimulationLead): Promise<number> {
     const { data: row, error } = await supabase
-        .from("investidores database")
+        .from("Investidores Database")
         .insert(data)
         .select("id")
         .single();
@@ -54,7 +54,7 @@ export async function createSimulationLead(data: SimulationLead): Promise<number
 /** Update an existing lead row by id. */
 export async function updateSimulationLead(id: number, data: Partial<SimulationLead>): Promise<void> {
     const { error } = await supabase
-        .from("investidores database")
+        .from("Investidores Database")
         .update({ ...data, updated_at: new Date().toISOString() })
         .eq("id", id);
 
