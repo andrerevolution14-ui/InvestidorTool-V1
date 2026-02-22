@@ -11,6 +11,12 @@ const WA_NUM = "351XXXXXXXXX";
 const WA_MSG = encodeURIComponent("Olá, completei a simulação e gostaria de receber oportunidades fora de mercado em Aveiro.");
 const WA_URL = `https://wa.me/${WA_NUM}?text=${WA_MSG}`;
 
+function trackPixel(event: string, data?: any) {
+  if (typeof window !== "undefined" && (window as any).fbq) {
+    (window as any).fbq("track", event, data);
+  }
+}
+
 const CAPITAL_OPTIONS = [
   { value: "under_100k", label: "Menos de €100.000", sub: "Entrada estratégica", avg: 75000 },
   { value: "100k_300k", label: "€100.000 – €300.000", sub: "Capital sólido", avg: 200000 },
@@ -84,7 +90,8 @@ function Logo({ size = "md", onClick }: { size?: "lg" | "md" | "sm"; onClick?: (
 
 /* WA pill link – visible but not green, used in steps 2-4 */
 function WaLink({ id }: { id: string }) {
-  return <div style={{ textAlign: "center", marginTop: "0.75rem" }}><a href={WA_URL} target="_blank" rel="noopener noreferrer" className="wa-pill" id={id}><WaIcon s={15} /><span>Receber oportunidades fora de mercado</span></a></div>;
+  const handleClick = () => trackPixel("Contact", { content_name: "whatsapp_pill", content_category: "lead_generation" });
+  return <div style={{ textAlign: "center", marginTop: "0.75rem" }}><a href={WA_URL} target="_blank" rel="noopener noreferrer" className="wa-pill" id={id} onClick={handleClick}><WaIcon s={15} /><span>Receber oportunidades fora de mercado</span></a></div>;
 }
 
 const SCROLL_STEPS: Step[] = ["results", "anchoring", "rational", "analysis", "strategy", "presentation"];
@@ -258,7 +265,7 @@ export default function Home() {
             <div className="hero-value-item"><span className="hv-icon">🟢</span><span>Guia: Deve ou não investir em Aveiro</span></div>
             <div className="hero-value-item"><span className="hv-icon">🔑</span><span>Acesso a oportunidades fora de mercado</span></div>
           </div>
-          <button className="btn-primary" onClick={() => go("q1")} id="cta-start">Iniciar a Minha Simulação Gratuita →</button>
+          <button className="btn-primary" onClick={() => { trackPixel("ViewContent", { content_name: "start_quiz_button" }); go("q1"); }} id="cta-start">Iniciar a Minha Simulação Gratuita →</button>
           <p className="micro-text" style={{ marginTop: "0.75rem" }}>Sem compromisso · Resultado imediato</p>
         </section>
       )}
@@ -667,7 +674,7 @@ export default function Home() {
 
             <div style={{ marginTop: "2.5rem" }}>
               <div className="cta-context-text">Comunicação direta. Sem envios massificados.</div>
-              <a href={WA_URL} target="_blank" rel="noopener noreferrer" className="btn-final-wa" id="wa-final">
+              <a href={WA_URL} target="_blank" rel="noopener noreferrer" className="btn-final-wa" id="wa-final" onClick={() => trackPixel("Contact", { content_name: "final_whatsapp_button" })}>
                 <WaIcon s={22} />
                 <span>Receber Oportunidades Selecionadas</span>
               </a>
