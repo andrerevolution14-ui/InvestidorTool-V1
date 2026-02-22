@@ -172,7 +172,7 @@ export default function Home() {
       go("processing");
       if (leadIdRef.current) {
         const label = MINDSET_OPTIONS.find(o => o.value === v)?.label || v;
-        updateLeadAction(leadIdRef.current, { preferencia: label, completed: true }).catch(() => { });
+        updateLeadAction(leadIdRef.current, { preferencia: label }).catch(() => { });
 
       }
       setTimeout(() => go("results"), 1800);
