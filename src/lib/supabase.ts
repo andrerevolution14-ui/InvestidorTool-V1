@@ -35,22 +35,30 @@ export interface SimulationLead {
 
 /** Insert a new lead row on page load. Returns the row id. */
 export async function createSimulationLead(data: SimulationLead): Promise<number> {
+    console.log("[Supabase SDK] Data to insert:", JSON.stringify(data));
+
+    // We try to insert. If it fails, we catch the error and log everything.
     const { data: result, error } = await supabase
         .from("Investidores Database")
-        .insert(data)
+        .insert([data]) // Wrap in array to be safe
         .select("id");
 
     if (error) {
-        console.error("[Supabase SDK] Insert error details:", error);
+        console.error("[Supabase SDK] INSERT FAILED!", {
+            code: error.code,
+            message: error.message,
+            details: error.details,
+            hint: error.hint
+        });
         throw error;
     }
 
-    // If RLS allows insert but not immediate select, result might be empty
     if (!result || result.length === 0) {
-        console.warn("[Supabase SDK] Insert succeeded but select returned no data (check RLS policies). Returning dummy ID 0.");
+        console.warn("[Supabase SDK] Insert appeared to work but no ID was returned. This usually means RLS is blocking the SELECT but allowed the INSERT. Returning 0.");
         return 0;
     }
 
+    console.log("[Supabase SDK] Insert successful, ID:", result[0].id);
     return result[0].id as number;
 }
 
