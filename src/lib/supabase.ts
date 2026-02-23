@@ -5,42 +5,39 @@ const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Matches "Investidores Database" table schema
+// Matches "Investidores Database" table schema exactly as per screenshot
 export interface SimulationLead {
-    // Contact data from Meta Instant Form (URL params)
-    Name?: string | null;
-    Phone?: string | number | null;
+    // Contact data (Capitalized in DB)
+    Name: string;      // Marked as Primary, cannot be null
+    Phone: number;    // Marked as Primary, cannot be null
     Email?: string | null;
 
-    // Meta tracking
-    fb_lead_id?: string | null;
-    fbclid?: string | null;
-    utm_source?: string | null;
-    utm_campaign?: string | null;
-
-    // Quiz answers (set after Q3)
+    // Quiz answers (Capitalized in DB)
     Capital?: string | null;
     Retorno?: string | null;
     "Gestão"?: string | null;
 
-    // status bool — user manages manually, never touched by code
+    // Status bits (Lowercase in DB)
     status?: boolean;
-
-    // Quiz completion flag — false on insert, true after Q3
     quiz?: boolean;
+
+    // Meta tracking (Lowercase in DB)
+    fb_lead_id?: string | null;
+    fbclid?: string | null;
+    utm_source?: string | null;
+    utm_campaign?: string | null;
 
     // Timestamps
     updated_at?: string;
 }
 
 /** Insert a new lead row on page load. Returns the row id. */
-export async function createSimulationLead(data: SimulationLead): Promise<number> {
+export async function createSimulationLead(data: any): Promise<number> {
     console.log("[Supabase SDK] Data to insert:", JSON.stringify(data));
 
-    // We try to insert. If it fails, we catch the error and log everything.
     const { data: result, error } = await supabase
         .from("Investidores Database")
-        .insert([data]) // Wrap in array to be safe
+        .insert([data])
         .select("id");
 
     if (error) {
@@ -54,11 +51,11 @@ export async function createSimulationLead(data: SimulationLead): Promise<number
     }
 
     if (!result || result.length === 0) {
-        console.warn("[Supabase SDK] Insert appeared to work but no ID was returned. This usually means RLS is blocking the SELECT but allowed the INSERT. Returning 0.");
+        console.warn("[Supabase SDK] Insert succeeded but select returned no data. Returning ID 0.");
         return 0;
     }
 
-    console.log("[Supabase SDK] Insert successful, ID:", result[0].id);
+    console.log("[Supabase SDK] SUCCESS, ID:", result[0].id);
     return result[0].id as number;
 }
 
@@ -69,5 +66,8 @@ export async function updateSimulationLead(id: number, data: Partial<SimulationL
         .update({ ...data, updated_at: new Date().toISOString() })
         .eq("id", id);
 
-    if (error) throw error;
+    if (error) {
+        console.error("[Supabase SDK] UPDATE FAILED!", error);
+        throw error;
+    }
 }

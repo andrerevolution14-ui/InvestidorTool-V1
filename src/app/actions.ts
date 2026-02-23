@@ -14,10 +14,13 @@ type MetaParams = {
     utm_campaign?: string;
 };
 
-function sanitizePhone(phone?: string): string | null {
-    if (!phone) return null;
-    // Keep digits only, but return as string to handle large numbers (e.g. 351...)
-    return phone.replace(/\D/g, "") || null;
+/**
+ * Returns a number for Supabase int8. If invalid, returns 0 to avoid PK null error.
+ */
+function sanitizePhoneToNumber(phone?: string): number {
+    if (!phone) return 0;
+    const clean = phone.replace(/\D/g, "");
+    return Number(clean) || 0;
 }
 
 /**
@@ -25,17 +28,13 @@ function sanitizePhone(phone?: string): string | null {
  * Inserts a partial lead with quiz = false.
  */
 export async function savePartialLeadAction(params: MetaParams) {
-    console.log("[Supabase] Attempting to save partial lead:", {
-        email: params.email,
-        phone: params.phone,
-        hasParams: !!(params.email || params.phone || params.name)
-    });
+    console.log("[Supabase] Partial lead trigger:", { email: params.email, name: params.name });
 
     try {
         const id = await createSimulationLead({
-            Name: params.name || null,
+            Name: params.name || "Interessado Aveiro", // Fallback because PK cannot be null
             Email: params.email || null,
-            Phone: sanitizePhone(params.phone) as any, // Cast to any to bypass interface if it's still number
+            Phone: sanitizePhoneToNumber(params.phone), // Must be number for int8
             fb_lead_id: params.fb_lead_id || null,
             fbclid: params.fbclid || null,
             utm_source: params.utm_source || null,
@@ -71,12 +70,12 @@ export async function savePartialLeadAction(params: MetaParams) {
         }
 
         return { success: true, id };
-    } catch (error: any) {
+    } catch (error) {
         console.error("[Supabase] savePartialLead FAILED:", {
-            message: error.message,
-            code: error.code,
-            details: error.details,
-            hint: error.hint
+            message: (error as any).message,
+            code: (error as any).code,
+            details: (error as any).details,
+            hint: (error as any).hint
         });
         return { success: false, id: null };
     }
@@ -93,9 +92,9 @@ export async function saveCompleteLeadAction(
 
     try {
         const id = await createSimulationLead({
-            Name: params.name || null,
+            Name: params.name || "Interessado Aveiro",
             Email: params.email || null,
-            Phone: sanitizePhone(params.phone) as any,
+            Phone: sanitizePhoneToNumber(params.phone),
             fb_lead_id: params.fb_lead_id || null,
             fbclid: params.fbclid || null,
             utm_source: params.utm_source || null,
@@ -133,12 +132,12 @@ export async function saveCompleteLeadAction(
         });
 
         return { success: true, id };
-    } catch (error: any) {
+    } catch (error) {
         console.error("[Supabase] saveCompleteLead FAILED:", {
-            message: error.message,
-            code: error.code,
-            details: error.details,
-            hint: error.hint
+            message: (error as any).message,
+            code: (error as any).code,
+            details: (error as any).details,
+            hint: (error as any).hint
         });
         return { success: false, id: null };
     }
@@ -190,14 +189,13 @@ export async function upgradeLeadAction(
         });
 
         return { success: true };
-    } catch (error: any) {
+    } catch (error) {
         console.error("[Supabase] upgradeLead FAILED:", {
-            message: error.message,
-            code: error.code,
-            details: error.details,
-            hint: error.hint
+            message: (error as any).message,
+            code: (error as any).code,
+            details: (error as any).details,
+            hint: (error as any).hint
         });
         return { success: false };
     }
 }
-
