@@ -48,9 +48,7 @@ function getProfileSummary(capital: string, horizon: string, mindset: string): s
     return "Quer acompanhar sem perder tempo. Tem visibilidade total sobre cada operação, mas a execução é profissional e delegada. O melhor dos dois mundos.";
 }
 
-const WA_NUM = "351XXXXXXXXX";
-const WA_MSG = encodeURIComponent("Olá, completei a simulação e quero saber mais sobre as estratégias de investimento.");
-const WA_URL = `https://wa.me/${WA_NUM}?text=${WA_MSG}`;
+const WA_URL = "https://wa.link/iafuq8";
 
 function WhatsAppIcon({ size = 20 }: { size?: number }) {
     return (

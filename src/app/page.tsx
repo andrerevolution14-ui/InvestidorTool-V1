@@ -29,9 +29,7 @@ const STAGGER_ITEM: Variants = {
 type Step = "hero" | "q1" | "q2" | "q3" | "processing" | "results" | "anchoring" | "rational" | "analysis" | "strategy" | "presentation" | "final";
 
 const SESSION_KEY = "silvermont_funnel";
-const WA_NUM = "351XXXXXXXXX";
-const WA_MSG = encodeURIComponent("Olá, completei a simulação e gostaria de receber oportunidades fora de mercado em Aveiro.");
-const WA_URL = `https://wa.me/${WA_NUM}?text=${WA_MSG}`;
+const WA_URL = "https://wa.link/iafuq8";
 
 function trackPixel(event: string, data?: any) {
   if (typeof window !== "undefined" && (window as any).fbq) {
@@ -148,15 +146,28 @@ export default function Home() {
 
   useEffect(() => {
     // 1. Parse Meta Instant Form params — stored in memory only.
+    // 1. Parse Meta Instant Form params — case-insensitive approach
     const params = new URLSearchParams(window.location.search);
+    const getParam = (keys: string[]) => {
+      for (const k of keys) {
+        const val = params.get(k);
+        if (val) return val;
+      }
+      // Also try case-insensitive match
+      for (const [key, value] of Array.from(params.entries())) {
+        if (keys.some(k => k.toLowerCase() === key.toLowerCase())) return value;
+      }
+      return undefined;
+    };
+
     metaParamsRef.current = {
-      name: params.get("full_name") || params.get("first_name") || params.get("name") || undefined,
-      email: params.get("email") || undefined,
-      phone: params.get("phone_number") || params.get("phone") || undefined,
-      fb_lead_id: params.get("lead_id") || params.get("fb_lead_id") || undefined,
-      fbclid: params.get("fbclid") || undefined,
-      utm_source: params.get("utm_source") || undefined,
-      utm_campaign: params.get("utm_campaign") || undefined,
+      name: getParam(["full_name", "first_name", "name", "full name"]),
+      email: getParam(["email", "user_email", "e-mail"]),
+      phone: getParam(["phone_number", "phone", "contact", "telefone"]),
+      fb_lead_id: getParam(["lead_id", "fb_lead_id", "fb_id"]),
+      fbclid: getParam(["fbclid"]),
+      utm_source: getParam(["utm_source"]),
+      utm_campaign: getParam(["utm_campaign"]),
     };
 
     // Ensure state is clean on mount
@@ -165,13 +176,26 @@ export default function Home() {
     setMindset("");
     setStep("hero");
 
-    // 2. Start 10-minute timer — inserts partial lead if Q3 is never completed.
+    // 2. Start 3-second timer — captures the lead
     timerRef.current = setTimeout(() => {
+      const p = metaParamsRef.current;
+      // We log to server to see what arrived
+      console.log("[Funnel] Data landing check:", { hasData: !!(p.email || p.phone || p.name), params: p });
+
+      if (!p.email && !p.phone && !p.name) return;
+
       timerFiredRef.current = true;
-      savePartialLeadAction(metaParamsRef.current)
-        .then(({ id }) => { if (id) leadIdRef.current = id; })
-        .catch(() => { });
-    }, 10 * 60 * 1000); // 10 minutes
+      savePartialLeadAction(p)
+        .then(({ id }) => {
+          if (id) {
+            leadIdRef.current = id;
+            console.log("[Funnel] Lead successfully anchored in Supabase, ID:", id);
+          }
+        })
+        .catch(err => {
+          console.error("[Funnel] Critical fail in savePartialLeadAction:", err);
+        });
+    }, 3000); // 3 seconds as requested
 
     setReady(true);
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };

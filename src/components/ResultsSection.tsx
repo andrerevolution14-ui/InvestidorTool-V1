@@ -41,9 +41,7 @@ function getResultRanges(capital: string, horizon: string) {
     return { conservative, typical, upper };
 }
 
-const WHATSAPP_NUMBER = "351XXXXXXXXX";
-const WHATSAPP_MSG = encodeURIComponent("Olá, completei a simulação e quero saber mais sobre oportunidades em Aveiro.");
-const WA_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_MSG}`;
+const WA_URL = "https://wa.link/iafuq8";
 
 function WhatsAppIcon({ size = 20 }: { size?: number }) {
     return (

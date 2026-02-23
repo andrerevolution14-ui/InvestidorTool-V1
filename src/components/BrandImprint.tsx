@@ -2,9 +2,7 @@
 
 import Image from "next/image";
 
-const WA_NUM = "351XXXXXXXXX";
-const WA_MSG = encodeURIComponent("Olá, quero saber mais sobre como trabalham e as oportunidades em Aveiro.");
-const WA_URL = `https://wa.me/${WA_NUM}?text=${WA_MSG}`;
+const WA_URL = "https://wa.link/iafuq8";
 
 function WhatsAppIcon({ size = 20 }: { size?: number }) {
     return (

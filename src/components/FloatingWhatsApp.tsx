@@ -1,10 +1,6 @@
 "use client";
 
-const WHATSAPP_NUMBER = "351XXXXXXXXX";
-const WHATSAPP_MESSAGE = encodeURIComponent(
-    "Olá, completei a simulação de investimento em Aveiro e gostaria de saber mais."
-);
-const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_MESSAGE}`;
+const WHATSAPP_URL = "https://wa.link/iafuq8";
 
 export default function FloatingWhatsApp() {
     return (

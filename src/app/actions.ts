@@ -14,28 +14,35 @@ type MetaParams = {
     utm_campaign?: string;
 };
 
-function sanitizePhone(phone?: string): number | null {
+function sanitizePhone(phone?: string): string | null {
     if (!phone) return null;
-    return Number(phone.replace(/\D/g, "")) || null;
+    // Keep digits only, but return as string to handle large numbers (e.g. 351...)
+    return phone.replace(/\D/g, "") || null;
 }
 
 /**
- * Called after 10 minutes if the user hasn't completed Q3.
+ * Called quickly after landing or after timeout.
  * Inserts a partial lead with quiz = false.
  */
 export async function savePartialLeadAction(params: MetaParams) {
+    console.log("[Supabase] Attempting to save partial lead:", {
+        email: params.email,
+        phone: params.phone,
+        hasParams: !!(params.email || params.phone || params.name)
+    });
+
     try {
         const id = await createSimulationLead({
             Name: params.name || null,
             Email: params.email || null,
-            Phone: sanitizePhone(params.phone),
+            Phone: sanitizePhone(params.phone) as any, // Cast to any to bypass interface if it's still number
             fb_lead_id: params.fb_lead_id || null,
             fbclid: params.fbclid || null,
             utm_source: params.utm_source || null,
             utm_campaign: params.utm_campaign || null,
             quiz: false,
         });
-        console.log("[Supabase] Partial lead saved (quiz=false), id:", id);
+        console.log("[Supabase] Partial lead saved successfully, id:", id);
 
         // Meta CAPI
         if (params.email || params.phone) {
@@ -64,8 +71,13 @@ export async function savePartialLeadAction(params: MetaParams) {
         }
 
         return { success: true, id };
-    } catch (error) {
-        console.error("[Supabase] savePartialLead FAILED:", JSON.stringify(error));
+    } catch (error: any) {
+        console.error("[Supabase] savePartialLead FAILED:", {
+            message: error.message,
+            code: error.code,
+            details: error.details,
+            hint: error.hint
+        });
         return { success: false, id: null };
     }
 }
@@ -77,11 +89,13 @@ export async function savePartialLeadAction(params: MetaParams) {
 export async function saveCompleteLeadAction(
     params: MetaParams & { capital: string; horizonte: string; preferencia: string }
 ) {
+    console.log("[Supabase] Attempting to save complete lead (immediate submission)");
+
     try {
         const id = await createSimulationLead({
             Name: params.name || null,
             Email: params.email || null,
-            Phone: sanitizePhone(params.phone),
+            Phone: sanitizePhone(params.phone) as any,
             fb_lead_id: params.fb_lead_id || null,
             fbclid: params.fbclid || null,
             utm_source: params.utm_source || null,
@@ -91,7 +105,7 @@ export async function saveCompleteLeadAction(
             "Gestão": params.preferencia,
             quiz: true,
         });
-        console.log("[Supabase] Complete lead saved (quiz=true), id:", id);
+        console.log("[Supabase] Complete lead saved successfully, id:", id);
 
         // Meta CAPI
         const head = await headers();
@@ -119,20 +133,27 @@ export async function saveCompleteLeadAction(
         });
 
         return { success: true, id };
-    } catch (error) {
-        console.error("[Supabase] saveCompleteLead FAILED:", JSON.stringify(error));
+    } catch (error: any) {
+        console.error("[Supabase] saveCompleteLead FAILED:", {
+            message: error.message,
+            code: error.code,
+            details: error.details,
+            hint: error.hint
+        });
         return { success: false, id: null };
     }
 }
 
 /**
- * Called when Q3 is completed AFTER the 10-min timeout already inserted a partial row.
+ * Called when Q3 is completed AFTER the partial row was already inserted.
  * Updates the existing partial row with quiz answers and sets quiz = true.
  */
 export async function upgradeLeadAction(
     id: number,
     data: MetaParams & { capital: string; horizonte: string; preferencia: string }
 ) {
+    console.log("[Supabase] Attempting to upgrade partial lead to complete, id:", id);
+
     try {
         await updateSimulationLead(id, {
             Capital: data.capital,
@@ -140,7 +161,7 @@ export async function upgradeLeadAction(
             "Gestão": data.preferencia,
             quiz: true,
         });
-        console.log("[Supabase] Partial lead upgraded to complete (quiz=true), id:", id);
+        console.log("[Supabase] Partial lead upgraded successfully, id:", id);
 
         // Meta CAPI
         const head = await headers();
@@ -169,8 +190,14 @@ export async function upgradeLeadAction(
         });
 
         return { success: true };
-    } catch (error) {
-        console.error("[Supabase] upgradeLead FAILED:", JSON.stringify(error));
+    } catch (error: any) {
+        console.error("[Supabase] upgradeLead FAILED:", {
+            message: error.message,
+            code: error.code,
+            details: error.details,
+            hint: error.hint
+        });
         return { success: false };
     }
 }
+

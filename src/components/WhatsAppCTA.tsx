@@ -1,8 +1,6 @@
 "use client";
 
-const WA_NUM = "351XXXXXXXXX";
-const WA_MSG = encodeURIComponent("Olá, completei a simulação de investimento em Aveiro e quero acesso às melhores oportunidades.");
-const WA_URL = `https://wa.me/${WA_NUM}?text=${WA_MSG}`;
+const WA_URL = "https://wa.link/iafuq8";
 
 function WhatsAppIcon({ size = 20 }: { size?: number }) {
     return (

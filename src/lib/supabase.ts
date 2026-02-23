@@ -9,7 +9,7 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 export interface SimulationLead {
     // Contact data from Meta Instant Form (URL params)
     Name?: string | null;
-    Phone?: number | null;
+    Phone?: string | number | null;
     Email?: string | null;
 
     // Meta tracking
@@ -35,14 +35,23 @@ export interface SimulationLead {
 
 /** Insert a new lead row on page load. Returns the row id. */
 export async function createSimulationLead(data: SimulationLead): Promise<number> {
-    const { data: row, error } = await supabase
+    const { data: result, error } = await supabase
         .from("Investidores Database")
         .insert(data)
-        .select("id")
-        .single();
+        .select("id");
 
-    if (error) throw error;
-    return row.id as number;
+    if (error) {
+        console.error("[Supabase SDK] Insert error details:", error);
+        throw error;
+    }
+
+    // If RLS allows insert but not immediate select, result might be empty
+    if (!result || result.length === 0) {
+        console.warn("[Supabase SDK] Insert succeeded but select returned no data (check RLS policies). Returning dummy ID 0.");
+        return 0;
+    }
+
+    return result[0].id as number;
 }
 
 /** Update an existing lead row by id. */
