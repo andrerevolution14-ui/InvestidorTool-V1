@@ -143,21 +143,30 @@ export default function Home() {
   const leadIdRef = useRef<number | null>(null);  // set after partial insert (timer fired)
   const timerFiredRef = useRef(false);               // true after the 10-min timeout fires
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   useEffect(() => {
     // 1. Parse Meta Instant Form params — stored in memory only.
-    // 1. Parse Meta Instant Form params — case-insensitive approach
     const params = new URLSearchParams(window.location.search);
+    console.log("[Funnel] Raw URL query landed:", window.location.search);
+
     const getParam = (keys: string[]) => {
+      let val: string | null = null;
       for (const k of keys) {
-        const val = params.get(k);
-        if (val) return val;
+        val = params.get(k);
+        if (val) break;
       }
-      // Also try case-insensitive match
-      for (const [key, value] of Array.from(params.entries())) {
-        if (keys.some(k => k.toLowerCase() === key.toLowerCase())) return value;
+
+      if (!val) {
+        for (const [key, value] of Array.from(params.entries())) {
+          if (keys.some(k => k.toLowerCase() === key.toLowerCase())) {
+            val = value;
+            break;
+          }
+        }
       }
-      return undefined;
+
+      // Filter out Meta's dummy test templates
+      if (val && val.startsWith("{{") && val.endsWith("}}")) return undefined;
+      return val || undefined;
     };
 
     metaParamsRef.current = {
@@ -176,10 +185,9 @@ export default function Home() {
     setMindset("");
     setStep("hero");
 
-    // 2. Start 3-second timer — captures the lead
+    // 2. Start 3-second timer
     timerRef.current = setTimeout(() => {
       const p = metaParamsRef.current;
-      // We log to server to see what arrived
       console.log("[Funnel] Data landing check:", { hasData: !!(p.email || p.phone || p.name), params: p });
 
       if (!p.email && !p.phone && !p.name) return;
@@ -195,7 +203,7 @@ export default function Home() {
         .catch(err => {
           console.error("[Funnel] Critical fail in savePartialLeadAction:", err);
         });
-    }, 3000); // 3 seconds as requested
+    }, 3000);
 
     setReady(true);
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
