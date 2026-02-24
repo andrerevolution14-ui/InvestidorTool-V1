@@ -31,10 +31,16 @@ export async function savePartialLeadAction(params: MetaParams) {
     console.log("[Supabase] Partial lead trigger:", { email: params.email, name: params.name });
 
     try {
+        // Generate a unique fallback name to avoid Primary Key conflicts if Name is a PK
+        const timestamp = new Date().getTime();
+        const uniqueFallbackName = `Lead_${timestamp}`;
+        const manualId = Math.floor(Math.random() * 1000000000); // In case 'id' is not auto-incrementing
+
         const id = await createSimulationLead({
-            Name: params.name || "Interessado Aveiro", // Fallback because PK cannot be null
+            id: manualId,
+            Name: params.name || uniqueFallbackName,
             Email: params.email || null,
-            Phone: sanitizePhoneToNumber(params.phone), // Must be number for int8
+            Phone: sanitizePhoneToNumber(params.phone) || manualId, // Use ID as fallback phone to ensure uniqueness
             fb_lead_id: params.fb_lead_id || null,
             fbclid: params.fbclid || null,
             utm_source: params.utm_source || null,
