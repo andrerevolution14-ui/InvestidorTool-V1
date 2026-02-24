@@ -28,26 +28,28 @@ function sanitizePhoneToNumber(phone?: string): number {
  * Inserts a partial lead with quiz = false.
  */
 export async function savePartialLeadAction(params: MetaParams) {
-    console.log("[Supabase] Partial lead trigger:", { email: params.email, name: params.name });
+    // 1. Validation: If all we have are placeholders or nothing, STOP.
+    const isPlaceholder = (val?: string) => !val || (val.startsWith("{{") && val.endsWith("}}"));
+
+    if (isPlaceholder(params.name) && isPlaceholder(params.email) && isPlaceholder(params.phone)) {
+        console.log("[Supabase] Aborting save: No real data provided (only Meta placeholders or empty values).");
+        return { success: false, id: null };
+    }
+
+    console.log("[Supabase] Real data detected, attempting save:", { email: params.email, name: params.name });
 
     try {
-        // Generate a unique fallback name to avoid Primary Key conflicts if Name is a PK
-        const timestamp = new Date().getTime();
-        const uniqueFallbackName = `Lead_${timestamp}`;
-        const manualId = Math.floor(Math.random() * 1000000000); // In case 'id' is not auto-incrementing
-
         const id = await createSimulationLead({
-            id: manualId,
-            Name: params.name || uniqueFallbackName,
-            Email: params.email || null,
-            Phone: sanitizePhoneToNumber(params.phone) || manualId, // Use ID as fallback phone to ensure uniqueness
+            Name: isPlaceholder(params.name) ? "Sem Nome" : params.name!,
+            Email: isPlaceholder(params.email) ? null : params.email!,
+            Phone: sanitizePhoneToNumber(params.phone),
             fb_lead_id: params.fb_lead_id || null,
             fbclid: params.fbclid || null,
             utm_source: params.utm_source || null,
             utm_campaign: params.utm_campaign || null,
             quiz: false,
         });
-        console.log("[Supabase] Partial lead saved successfully, id:", id);
+        console.log("[Supabase] Lead saved successfully, id:", id);
 
         // Meta CAPI
         if (params.email || params.phone) {
