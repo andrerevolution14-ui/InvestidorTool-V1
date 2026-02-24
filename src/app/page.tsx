@@ -164,8 +164,9 @@ export default function Home() {
         }
       }
 
-      // Filter out Meta's dummy test templates
-      if (val && val.startsWith("{{") && val.endsWith("}}")) return undefined;
+      // Log detected value for debug
+      if (val) console.log(`[Funnel] Parameter match: ${keys[0]} = ${val}`);
+
       return val || undefined;
     };
 
