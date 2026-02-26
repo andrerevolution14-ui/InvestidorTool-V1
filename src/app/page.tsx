@@ -330,7 +330,7 @@ export default function Home() {
             <h1 className="headline-hero">Aveiro está a explodir.<br /><span className="gold-highlight">O seu dinheiro devia estar lá.</span></h1>
             <p className="subheadline">+12% valorização anual. Procura recorde. Stock limitado. Descubra em 30 segundos se faz sentido para si.</p>
 
-            <div className="context-image-break" style={{ marginTop: "1rem", marginBottom: "1rem" }}>
+            <div className="context-image-break" style={{ marginTop: "0.5rem", marginBottom: "0.5rem" }}>
               <img src="/aveiro-1.png" alt="Aveiro" className="context-img-full" loading="eager" fetchPriority="high" />
             </div>
 
