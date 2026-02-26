@@ -159,8 +159,8 @@ h3 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 1rem clamp(1.25rem, 5vw, 2.5rem) 12rem;
-  /* Increased clearance for banner */
+  padding: 1rem clamp(1.25rem, 5vw, 2.5rem) 2rem;
+  /* Main padding handled by child spacer */
 }
 
 .step-centered {
@@ -175,6 +175,18 @@ h3 {
 .step-inner {
   width: 100%;
   max-width: var(--content-max);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Spacer to ensure fixed banner never covers the last button/link */
+.step-inner::after {
+  content: '';
+  display: block;
+  height: 100px;
+  /* Clearance for banner + safe area */
+  flex-shrink: 0;
+  pointer-events: none;
 }
 
 .animate-step {
@@ -312,9 +324,9 @@ h3 {
   align-items: center;
   justify-content: center;
   gap: 0.55rem;
-  padding: 0.5rem 1.25rem calc(0.5rem + env(safe-area-inset-bottom, 0px));
-  background: #121216;
-  /* Fully solid background */
+  padding: 0.4rem 1.25rem calc(0.4rem + env(safe-area-inset-bottom, 0px));
+  background: #0d0d10;
+  /* Solid deep dark */
   border-top: 1px solid rgba(212, 168, 67, 0.25);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -322,8 +334,8 @@ h3 {
 
 .selection-banner-dot {
   flex-shrink: 0;
-  width: 7px;
-  height: 7px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   background: var(--gold-light);
   box-shadow: 0 0 8px var(--gold-glow);
@@ -345,11 +357,11 @@ h3 {
 }
 
 .selection-banner-text {
-  font-size: clamp(0.72rem, 2vw, 0.82rem);
+  font-size: 0.72rem;
   color: var(--text-tertiary);
   font-style: italic;
   letter-spacing: 0.01em;
-  line-height: 1.4;
+  line-height: 1.3;
   text-align: center;
 }
 
