@@ -313,6 +313,12 @@ export default function Home() {
         )}
       </AnimatePresence>
 
+      {/* ── Persistent Selection Banner ── */}
+      <div className="selection-banner" aria-label="Nota de seleção de investidores">
+        <span className="selection-banner-dot" aria-hidden="true" />
+        <span className="selection-banner-text">Os investidores selecionados serão contactados para apresentação detalhada de projetos.</span>
+      </div>
+
       <AnimatePresence mode="wait">
         {step === "hero" && (
           <motion.section
